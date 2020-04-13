@@ -1,0 +1,12 @@
+{
+    "express": {
+        "port": "3333"
+    },
+    "mongodb": {
+        "dbuser": "root",
+        "dbpassword": "databas3",
+        "address": "ds131989.mlab.com",
+        "port": "31989",
+        "dbname": "eaglecms"
+    }
+}

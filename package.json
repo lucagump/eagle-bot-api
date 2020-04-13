@@ -1,0 +1,26 @@
+{
+  "name": "eagle-cms",
+  "version": "1.0.0",
+  "description": "CMS used by E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable/Trello",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.9.9",
+    "nodemon": "^2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js",
+    "serve": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucagump/eagle-cms.git"
+  },
+  "author": "Luca Martinelli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucagump/eagle-cms/issues"
+  },
+  "homepage": "https://github.com/lucagump/eagle-cms#readme"
+}
