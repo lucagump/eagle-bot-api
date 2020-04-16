@@ -1,17 +1,20 @@
 {
   "name": "eagle-cms",
   "version": "1.0.0",
-  "description": "CMS used by E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable/Trello",
-  "main": "app.js",
+  "description": "CMS used by E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable",
+  "main": "server.js",
   "dependencies": {
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "mongoose": "^5.9.9",
-    "nodemon": "^2.0.3"
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.3",
+    "path": "^0.12.7"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node app.js",
-    "serve": "nodemon app.js"
+    "start": "node server.js",
+    "serve": "nodemon server.js"
   },
   "repository": {
     "type": "git",
