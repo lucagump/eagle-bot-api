@@ -40,6 +40,14 @@ app.use(function (req, res, next) {
 var db_routes = require('./services/database/database.routes.js');
 app.use('/database', db_routes);
 
+// Include Telegram routes
+var telegram_routes = require('./services/interface/telegram.routes.js');
+app.use('/telegram', telegram_routes);
+
+// Start Telegram Interface
+var telegram_interface = require('./services/interface/telegram.interface.js');
+
+// Just an Index 
 app.get('/', function(req, res) {
     res.sendFile(path.join('.public/index.html'));
 });

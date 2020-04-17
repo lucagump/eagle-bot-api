@@ -8,5 +8,8 @@
         "address": "ds131989.mlab.com",
         "port": "31989",
         "dbname": "eaglecms"
+    },
+    "telegram":{
+        "token": "1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo"   
     }
 }

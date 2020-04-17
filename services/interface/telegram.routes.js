@@ -1,7 +1,7 @@
 var express = require('express');
 router = express.Router();
 
-const database_controller = require('./controllers/database.controllers');
+const telegram_controller = require('./controllers/telegram.controllers');
 
 /*
 	GET		/user
@@ -15,9 +15,9 @@ const database_controller = require('./controllers/database.controllers');
 
 // a simple test url to check that our app is up and running
 router.get('/test', function (req, res) {
-    res.send('Hello from Database Service!');
+    res.send('Hello from Telegram Service!');
 });
 
-router.get('/products/', database_controller.createProduct)
+router.get('/auth/', telegram_controller.auth)
 
 module.exports = router;
