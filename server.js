@@ -7,7 +7,7 @@ var morgan = require('morgan');                         // log requests to the c
 var config = require('./config/config.json');
 var path = require('path');
 
-global.app_domain = "http://localhost:8080" //https://safexchange.herokuapp.com"
+global.app_domain = "http://localhost:8080" //https://eagle-cms.herokuapp.com"
 
 app.use(session({ secret: 'ssshhhhh', resave: true, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));        // set the static files location /public/img will be /img for users
@@ -40,9 +40,9 @@ app.use(function (req, res, next) {
 var db_routes = require('./services/database/database.routes.js');
 app.use('/database', db_routes);
 
-
-
-
+app.get('/', function(req, res) {
+    res.sendFile(path.join('.public/index.html'));
+});
 
 app.listen(expressport, () => {
     console.log('\x1b[5m%s\x1b[0m', 'Server is up and running on port number ' + expressport + '\n');
