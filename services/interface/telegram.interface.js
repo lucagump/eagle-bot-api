@@ -93,7 +93,7 @@ bot.onText(/\/getIssues(.*):(.*)|\/getIssueS/, function (msg, match) {
   if (!repo) return bot.sendMessage(telegramId, MESSAGES.USERNAME_NOT_SPECIFIED);
   if (!issue) return bot.sendMessage(telegramId, MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
 
-  return bot.sendMessage(msg.from.id, 'Issues created');
+  return bot.sendMessage(msg.from.id, 'Tiè Issues are here');
 });
 
 bot.onText(/\/about/, function (msg) {
