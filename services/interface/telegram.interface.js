@@ -1,6 +1,8 @@
 var telegrambot = require('node-telegram-bot-api')
 var schedule = require('node-schedule')
 const config = require('../../config/config.json')
+const axios = require('axios')
+
 const { MESSAGES } = require('./common/messages.js')
 
 var token = config.telegram.token;
@@ -103,11 +105,21 @@ bot.onText(/\/help/, function (msg) {
   return bot.sendMessage(msg.from.id, response);
 });
 
+bot.onText(/\/testissues/, function (msg) {
+  var data = getIssuesTest();
+  return bot.sendMessage(msg.from.id,data);
+});
 
 
-
-
-
+// Want to use async/await? Add the `async` keyword to your outer function/method.
+async function getIssuesTest() {
+  try {
+    const response = await axios.get(app_domain + '/airtable/tasks');
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 
 

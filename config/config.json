@@ -11,5 +11,10 @@
     },
     "telegram":{
         "token": "1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo"   
+    },
+    "airtable":{
+        "url": "https://api.airtable.com",
+        "apikey": "keyPJzBFtPwm47yGH",
+        "base": "appL0BiFOp5BwTFox"
     }
 }

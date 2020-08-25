@@ -42,7 +42,11 @@ app.use('/database', db_routes);
 
 // Include Telegram routes
 var telegram_routes = require('./services/interface/telegram.routes.js');
-app.use('/telegram', telegram_routes);
+app.use('/action', telegram_routes);
+
+// Include Telegram routes
+var airtable_routes = require('./services/airtable/airtable.routes.js');
+app.use('/airtable', airtable_routes);
 
 // Start Telegram Interface
 var telegram_interface = require('./services/interface/telegram.interface.js');
