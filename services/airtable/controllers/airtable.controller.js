@@ -4,6 +4,63 @@ const config = require('../../../config/config.json');
 
 var base = new Airtable({apiKey: config.airtable.apikey}).base(config.airtable.base);
 
+async function getMembers(){ 
+    base('Members').select({
+        view: "Full Grid",
+        cellFormat: "json",
+    }).eachPage(function page(records, fetchNextPage) {
+        // This function (`page`) will get called for each page of records.
+    
+        records.forEach(function(record) {
+            console.log(record.get('Name') + " Tasks Assigned "+ record.get('Tasks'));
+        });
+    
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage();
+    
+    }, function done(err) {
+        if (err) { 
+            console.error(err); return; 
+        } else {
+            return records;
+        }
+    });
+};
+
+async function getTasks() {
+    base('Tasks').select({
+        view: "Full Grid",
+        cellFormat: "json",
+    }).eachPage(function page(records, fetchNextPage) {
+        // This function (`page`) will get called for each page of records.
+    
+        records.forEach(function(record) {
+            console.log('Retrieved', record.get('Assign To'));
+        });
+
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage();
+    
+    }, function done(err) {
+        if (err) { 
+            console.error(err); return; 
+        } else {
+            return records;
+        }
+    });    
+};
+
+async function findRecord(table, recordID){
+    base(table).find(recordID, function(err, record) {
+        if (err) { console.error(err); return; }
+        console.log('Retrieved', record.id);
+    })
+}
+
 module.exports = {
 
     //Simple version, without validation or sanitation
@@ -11,54 +68,34 @@ module.exports = {
         res.send('Greetings from the Test method!');
     },
 
-    getMembers: function(req, res) {
-        base('Members').select({
-            // Selecting the first 3 records in Full Grid:
-            maxRecords: 10,
-            view: "Full Grid"
-        }).eachPage(function page(records, fetchNextPage) {
-            // This function (`page`) will get called for each page of records.
+    getMembers: async function(req, res) {
         
-            records.forEach(function(record) {
-                console.log('Retrieved', record.get('Name'));
-            });
-        
-            // To fetch the next page of records, call `fetchNextPage`.
-            // If there are more records, `page` will get called again.
-            // If there are no more records, `done` will get called.
-            fetchNextPage();
-        
-        }, function done(err) {
-            if (err) { 
-                console.error(err); return; 
-            } 
-            res.status(201).send(records)
-        });
+        var text = '{ "employees" : [' +
+        '{ "firstName":"John" , "lastName":"Doe" },' +
+        '{ "firstName":"Anna" , "lastName":"Smith" },' +
+        '{ "firstName":"Peter" , "lastName":"Jones" } ]}';
+
+        var members = await getMembers();
+        var tasks = await getTasks();
+
+        // console.log(JSON.stringify(records));
+        // res.status(201).send(JSON.parse(text))
+        res.status(201).send(members)
     },
 
-    getTasks: function(req, res) {
-        base('Tasks').select({
-            // Selecting the first 3 records in Full Grid:
-            maxRecords: 10,
-            view: "Full Grid"
-        }).eachPage(function page(records, fetchNextPage) {
-            // This function (`page`) will get called for each page of records.
+    getTasks: async function(req, res) {
         
-            records.forEach(function(record) {
-                console.log('Retrieved', record.get('Name'));
-            });
+        var text = '{ "employees" : [' +
+        '{ "firstName":"John" , "lastName":"Doe" },' +
+        '{ "firstName":"Anna" , "lastName":"Smith" },' +
+        '{ "firstName":"Peter" , "lastName":"Jones" } ]}';
 
-            // To fetch the next page of records, call `fetchNextPage`.
-            // If there are more records, `page` will get called again.
-            // If there are no more records, `done` will get called.
-            fetchNextPage();
-        
-        }, function done(err) {
-            if (err) { 
-                console.error(err); return; 
-            } 
-            res.status(201).send(records)
-        });
+        var members = await getMembers();
+        var tasks = await getTasks();
+
+        // console.log(JSON.stringify(records));
+        // res.status(201).send(JSON.parse(text))
+        res.status(201).send(data)
     },
 
     createTask: function(req, res) {
@@ -88,4 +125,34 @@ module.exports = {
             });
           });
     },
+
+    deleteTask: function(req, res) {
+        base('Members').destroy([ req.recordID,], function(err, deletedRecords) {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log('Deleted', deletedRecords.length, 'records');
+          });
+    },
+
+    assignTask: function(req, res) {
+        // Check se esiste la task
+        base('Members').update([
+        {
+            "id": req.recordID,
+            "Tasks": [
+                req.taskID
+            ],
+        }
+        ], function(err, records) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            records.forEach(function(record) {
+                console.log(record.get('Department'));
+            });
+        });
+    }
 }

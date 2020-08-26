@@ -7,7 +7,9 @@ var morgan = require('morgan');                         // log requests to the c
 var config = require('./config/config.json');
 var path = require('path');
 
-global.app_domain = "http://localhost:8080" //https://eagle-cms.herokuapp.com"
+// Choose what port to use. If deployed on heroku process.env.PORT will be set and therefore used
+const expressport = process.env.PORT || config.express.port;
+global.app_domain = "http://localhost:" + expressport //https://eagle-cms.herokuapp.com"
 
 app.use(session({ secret: 'ssshhhhh', resave: true, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));        // set the static files location /public/img will be /img for users
@@ -15,9 +17,6 @@ app.use(morgan('dev'));                                         // log every req
 app.use(bodyParser.urlencoded({ extended: true }));             // parse application/x-www-form-urlencoded
 //app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());                                     // parse application/json
-
-// Choose what port to use. If deployed on heroku process.env.PORT will be set and therefore used
-const expressport = process.env.PORT || config.express.port;
 
 /** middleware route to support CORS and preflighted requests */
 app.use(function (req, res, next) {
