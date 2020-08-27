@@ -13,6 +13,7 @@
         "token": "1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo"   
     },
     "github":{
+        "test": "https://reqres.in/api/users",
         "uri": "https://api.github.com/",
         "token": "c288c1c5a26811934cc0296235efddcb388b6098"
     },

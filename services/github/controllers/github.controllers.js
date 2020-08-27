@@ -32,6 +32,25 @@ module.exports = {
         })
     },
 
+    getUsers: function(req, res) {        
+        // URL used to retrieve data dinamically
+        let url = uri + "user";
+        const response = axios.get(url, { 
+            headers: {
+                'Authorization': config.github.token
+            }
+        })
+        .then(function (response) {
+            console.log(response.data);
+            res.status(201).send(response.data);
+        })
+        .catch(function (error) {
+        console.log(error);
+        })
+        .then(function () {
+            console.log("Every time you hit me")
+        })
+    },
     getRepositories: function(req, res) {
     
     },

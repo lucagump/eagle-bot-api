@@ -106,21 +106,26 @@ bot.onText(/\/help/, function (msg) {
 });
 
 bot.onText(/\/getissues/, async function (msg) {
-  var data = await getIssuesTest();
+  var data =  getIssuesTest();
   return bot.sendMessage(msg.from.id,data);
 });
 
-
-// Want to use async/await? Add the `async` keyword to your outer function/method.
-async function getIssuesTest() {
-  try {
-    const response = (await axios.get(app_domain + '/airtable/tasks')).data;
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-  return response
-}
+function getIssuesTest(req, res) {        
+  // URL used to retrieve data dinamically
+  let url = config.github.test
+  const response = axios.get(url, { 
+  })
+  .then(function (response) {
+    console.log(response.data);
+    return response
+  })
+  .catch(function (error) {
+    console.log(error);
+  })
+  .then(function () {
+    console.log("Every time you hit me")
+  })
+};
 
 let siteUrl;
 bot.onText(/\/bookmark (.+)/, (msg, match) => {
