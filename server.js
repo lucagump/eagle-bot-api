@@ -40,12 +40,16 @@ var db_routes = require('./services/database/database.routes.js');
 app.use('/database', db_routes);
 
 // Include Telegram routes
-var telegram_routes = require('./services/interface/telegram.routes.js');
-app.use('/action', telegram_routes);
+var action_routes = require('./services/interface/telegram.routes.js');
+app.use('/action', action_routes);
 
 // Include Telegram routes
 var airtable_routes = require('./services/airtable/airtable.routes.js');
 app.use('/airtable', airtable_routes);
+
+// Include Telegram routes
+var github_routes = require('./services/github/github.routes.js');
+app.use('/github', github_routes);
 
 // Start Telegram Interface
 var telegram_interface = require('./services/interface/telegram.interface.js');

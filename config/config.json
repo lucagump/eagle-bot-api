@@ -12,6 +12,10 @@
     "telegram":{
         "token": "1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo"   
     },
+    "github":{
+        "uri": "https://api.github.com/",
+        "token": "c288c1c5a26811934cc0296235efddcb388b6098"
+    },
     "airtable":{
         "url": "https://api.airtable.com",
         "apikey": "keyPJzBFtPwm47yGH",
