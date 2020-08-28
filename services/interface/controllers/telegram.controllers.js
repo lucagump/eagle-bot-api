@@ -1,8 +1,8 @@
 module.exports = {
 
     //Simple version, without validation or sanitation
-    auth: function(req, res) {
+    sendMessage: function(req, res) {
+        bot.sendMessage(msg.from.id, "data");
         res.send('Greetings from the Auth method!');
     },
-
 }

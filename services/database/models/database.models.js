@@ -1,5 +1,11 @@
 var mongoose = require('mongoose');
 
+var UserToken = new mongoose.Schema({
+    chatID: String,
+    githubToken: String,
+    airtableToken: String
+});
+
 var UserSchema = new mongoose.Schema({
     name: String,
     email: String,
@@ -17,3 +23,4 @@ var ProductSchema = new mongoose.Schema({
 // Export the model
 mongoose.model('Products', ProductSchema);
 mongoose.model('Users', UserSchema);
+mongoose.model('UserToken', UserToken);

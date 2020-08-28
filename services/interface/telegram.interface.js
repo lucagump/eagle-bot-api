@@ -1,18 +1,30 @@
 var telegrambot = require('node-telegram-bot-api')
 var schedule = require('node-schedule')
-const config = require('../../config/config.json')
+var express = require('express');
 const axios = require('axios')
 
+const config = require('../../config/config.json')
+const telegram_controller = require('./controllers/telegram.controllers');
 const { MESSAGES } = require('./common/messages.js')
 
+router = express.Router();
 var token = config.telegram.token;
-
 var bot = new telegrambot(token, { polling: true })
 
-bot.onText(/\/test/, function (msg) {
-    bot.sendMessage(msg.chat.id, "Hello from Telegram Interface");
-});
+// 
+// .___        __                 _____                     
+// |   | _____/  |_  ____________/ ____\____    ____  ____  
+// |   |/    \   __\/ __ \_  __ \   __\\__  \ _/ ___\/ __ \ 
+// |   |   |  \  | \  ___/|  | \/|  |   / __ \\  \__\  ___/ 
+// |___|___|  /__|  \___  >__|   |__|  (____  /\___  >___  >
+//          \/          \/                  \/     \/    \/ 
+// 
 
+bot.onText(/\/test/, function (msg) {
+  bot.sendMessage(msg.chat.id, "Hello from Telegram Interface");
+  bot.sendMessage(msg.chat.id, "Chat ID " + msg.chat.id);
+  bot.sendMessage(msg.chat.id, "Group ID " + msg.from.id);
+});
 
 bot.onText(/\/start/, function (msg) {
   return bot.sendMessage(msg.from.id, MESSAGES.HELP);
@@ -85,18 +97,18 @@ bot.onText(/\/addIssue(.*):(.*)|\/addIssue/, function (msg, match) {
   return bot.sendMessage(msg.from.id, 'Issues created');
 });
 
-bot.onText(/\/getIssues(.*):(.*)|\/getIssueS/, function (msg, match) {
-  const repo = match[1] && match[1].split('@')[0];
-  const issue = match[2];
-  const telegramId = msg.from.id;
-
-  // Check valid message, check github issues 
-  if (!repo && !token) return bot.sendMessage(telegramId, MESSAGES.USERNAME_AND_GITHUB_TOKEN_NOT_SPECIFIED);
-  if (!repo) return bot.sendMessage(telegramId, MESSAGES.USERNAME_NOT_SPECIFIED);
-  if (!issue) return bot.sendMessage(telegramId, MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
-
-  return bot.sendMessage(msg.from.id, 'Tiè Issues are here');
-});
+//bot.onText(/\/getIssues(.*):(.*)|\/getIssueS/, function (msg, match) {
+//  const repo = match[1] && match[1].split('@')[0];
+//  const issue = match[2];
+//  const telegramId = msg.from.id;
+//
+//  // Check valid message, check github issues 
+//  if (!repo && !token) return bot.sendMessage(telegramId, MESSAGES.USERNAME_AND_GITHUB_TOKEN_NOT_SPECIFIED);
+//  if (!repo) return bot.sendMessage(telegramId, MESSAGES.USERNAME_NOT_SPECIFIED);
+//  if (!issue) return bot.sendMessage(telegramId, MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
+//
+//  return bot.sendMessage(msg.from.id, 'Tiè Issues are here');
+//});
 
 bot.onText(/\/about/, function (msg) {
   return bot.sendMessage(msg.from.id, MESSAGES.ABOUT);
@@ -105,9 +117,10 @@ bot.onText(/\/help/, function (msg) {
   return bot.sendMessage(msg.from.id, response);
 });
 
-bot.onText(/\/getissues/, async function (msg) {
-  var data =  getIssuesTest();
-  return bot.sendMessage(msg.from.id,data);
+bot.onText(/\/getissues/, function (msg) {
+  // var data  =  getIssuesTest();
+  console.log(msg);
+  return bot.sendMessage(msg.from.id, "data");
 });
 
 function getIssuesTest(req, res) {        
@@ -117,13 +130,13 @@ function getIssuesTest(req, res) {
   })
   .then(function (response) {
     console.log(response.data);
-    return response
+    return response.data
   })
   .catch(function (error) {
+    console.log("Every time you catch me")
     console.log(error);
   })
   .then(function () {
-    console.log("Every time you hit me")
   })
 };
 
@@ -165,3 +178,21 @@ var scheduledMessage = schedule.scheduleJob('30 18 * * *', function () {});
 // │    │    └─────────────── hour (0 - 23)
 // │    └──────────────────── minute (0 - 59)
 // └───────────────────────── second (0 - 59, OPTIONAL).
+
+// a simple test url to check that our app is up and running
+
+// __________               __                 
+// \______   \ ____  __ ___/  |_  ____   ______
+//  |       _//  _ \|  |  \   __\/ __ \ /  ___/
+//  |    |   (  <_> )  |  /|  | \  ___/ \___ \ 
+//  |____|_  /\____/|____/ |__|  \___  >____  >
+//         \/                        \/     \/ 
+// 
+
+router.get('/test', function (req, res) {
+  res.send('Hello from the Telegram Route!');
+});
+
+router.get('/sendMessage/', telegram_controller.sendMessage)
+
+module.exports = router;

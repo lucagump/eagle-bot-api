@@ -20,4 +20,9 @@ router.get('/test', function (req, res) {
 
 router.get('/products/', database_controller.createProduct)
 
+router.get('/token/:chatID', database_controller.getToken)
+
+router.post('/token/', database_controller.storeToken)
+
+
 module.exports = router;

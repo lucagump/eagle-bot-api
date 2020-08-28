@@ -32,6 +32,7 @@ mongoose.connect(url,options,
 
 var Product = mongoose.model('Products');
 var User = mongoose.model('Users');
+var UserToken = mongoose.model('UserToken');
 
 function generateRandomInt(min, max) {
     let value = parseInt(Math.random() * (max - min) + min);
@@ -43,6 +44,36 @@ module.exports = {
     //Simple version, without validation or sanitation
     test: function(req, res) {
         res.send('Greetings from the Test method!');
+    },
+
+    storeToken: function(req, res) {
+        let usertoken = new UserToken({
+            chatID: req.body.chatID,
+            githubToken: req.body.githubToken,
+            airtableToken: req.body.airtableToken,
+        });
+
+        usertoken.save(function(err) {
+            if (err) {
+                console.log(err)
+                res.status(500).send('Product couldn\'t be saved :(');
+            } 
+            res.status(201).send(usertoken)
+        })
+    },
+
+    getToken: function(req, res) {
+        console.log(req.params.chatID)
+        UserToken.findOne({ chatID: req.params.chatID },
+            function(err, usertoken) {
+                if (err){
+                console.log(err)
+                res.status(500).send('Request couldn\'t be processed :(');
+                }
+                if(usertoken != null)
+                res.status(200).json(usertoken)
+            }
+        )
     },
 
     createProduct: function(req, res) {
@@ -73,5 +104,5 @@ module.exports = {
             res.status(404).send('Product couldn\'t be found :(');
 
         })
-    },
+    }
 }

@@ -9,7 +9,8 @@ var path = require('path');
 
 // Choose what port to use. If deployed on heroku process.env.PORT will be set and therefore used
 const expressport = process.env.PORT || config.express.port;
-global.app_domain = "https://eagle-cms.herokuapp.com" + expressport // http://localhost:"
+global.app_domain = "http://localhost:" + expressport; 
+// global.app_domain = "https://eagle-cms.herokuapp.com" + expressport ;
 
 app.use(session({ secret: 'ssshhhhh', resave: true, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));        // set the static files location /public/img will be /img for users
@@ -35,24 +36,25 @@ app.use(function (req, res, next) {
     next();
 });
 
-// Include DATABASE routes
+// Include DataBase routes
 var db_routes = require('./services/database/database.routes.js');
 app.use('/database', db_routes);
 
-// Include Telegram routes
-var action_routes = require('./services/interface/telegram.routes.js');
-app.use('/action', action_routes);
+// Include Actions routes
+var actions_routes = require('./services/actions/actions.routes.js');
+app.use('/actions', actions_routes);
 
-// Include Telegram routes
+// Include Airtable routes
 var airtable_routes = require('./services/airtable/airtable.routes.js');
 app.use('/airtable', airtable_routes);
 
-// Include Telegram routes
+// Include Github routes
 var github_routes = require('./services/github/github.routes.js');
 app.use('/github', github_routes);
 
-// Start Telegram Interface
+// Start Telegram Service with relative routes
 var telegram_interface = require('./services/interface/telegram.interface.js');
+app.use('/telegram', telegram_interface);
 
 // Just an Index 
 app.get('/', function(req, res) {

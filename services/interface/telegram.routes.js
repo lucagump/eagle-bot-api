@@ -15,9 +15,9 @@ const telegram_controller = require('./controllers/telegram.controllers');
 
 // a simple test url to check that our app is up and running
 router.get('/test', function (req, res) {
-    res.send('Hello from the Business Logic!');
+    res.send('Hello from the Telegram Route!');
 });
 
-router.get('/auth/', telegram_controller.auth)
+router.get('/sendMessage/', telegram_controller.sendMessage)
 
 module.exports = router;
