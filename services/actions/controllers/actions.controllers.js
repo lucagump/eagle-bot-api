@@ -21,8 +21,9 @@ module.exports = {
             airtableToken: req.body.githubToken
         }).then(response => {
             console.log("actions/storeToken -> Token Stored");
-            res.end(response.data);
+            res.status(201).send(response.data);
         }).catch(error =>{
+            res.status(500).send('500 - Internal Server Error')
             console.log(error);
         });
     },

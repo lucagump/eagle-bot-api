@@ -1,8 +1,33 @@
+const axios = require('axios')
+
+const token = process.env.TELEGRAM_TOKEN || config.telegram.token
+const url = "https://api.telegram.org/bot" + token 
+
+async function sendMessage(req) {        
+    try {
+      const response = await axios.post(url+"/sendMessage", {
+        chat_id: req.body.chat_id,  
+        text: req.body.text  
+      });
+      console.log(response.data);
+      return response.data
+    } 
+    catch(error) {
+      console.log("Every time you catch me")
+      console.log(error);
+    }
+  };
+
 module.exports = {
 
-    //Simple version, without validation or sanitation
-    sendMessage: function(req, res) {
-        bot.sendMessage(msg.from.id, "data");
-        res.send('Greetings from the Auth method!');
-    },
+    send: async function(req, res) {
+        try {
+            const message = await sendMessage(req)
+            await res.status(200).send('Message Sent!' + message);
+        } catch (error) {
+            res.status(500).send('500 - Internal Server Error')
+            console.log(error);
+        }
+    }
 }
+
