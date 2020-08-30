@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');                     // mongoose for mongodb
+var mongoose = require('mongoose');                     
 const config = require('../../../config/config.json');
-require('../models/database.models.js');						// create the models for the objs
+require('../models/database.models.js');				
 
 const dbuser = process.env.DB_USER || config.mongodb.dbuser;
 const dbpassword = process.env.DB_PASSWORD || config.mongodb.dbpassword;
@@ -25,23 +25,10 @@ mongoose.connect(url,options,
 			console.log("DB error: " + err);
 		else
             console.log('\n\n\x1b[33m%s\x1b[0m', url);
-	});     // connect to mongoDB database
+	});     
 
-//const db = mongoose.connection;
-
-var Product = mongoose.model('Products');
 var User = mongoose.model('Users');
 var UserToken = mongoose.model('UserToken');
-
-function generateRandomInt(min, max) {
-    let value = parseInt(Math.random() * (max - min) + min);
-    return value;
-}
-
-function printDocument(document) {
-    console.log('\x1b[43m\x1b[31mINFO:\x1b[0m')
-    console.log(document)
-}
 
 module.exports = {
 
@@ -53,11 +40,12 @@ module.exports = {
     storeToken: function(req, res) {
         if (req.body.chatID =! null) {
             let usertoken = new UserToken({
+                userID: req.body.userID,
                 chatID: req.body.chatID,
+                usernameTelegram: req.body.username,
                 githubToken: req.body.githubToken,
                 airtableToken: req.body.airtableToken,
             });
-
             usertoken.save(function(err) {
                 if (err) {
                     console.log('\x1b[33mThere was an error while saving the usertoken\x1b[0m\n')
@@ -118,34 +106,32 @@ module.exports = {
             res.status(400).send('400 - Bad Request')
         } 
     },
-
-    createProduct: function(req, res) {
-        let product = new Product({
-            name:"Banana",
-            price: 10 + generateRandomInt(-2, 2),
+    // Check se esiste poi check se posso eliminare roasted bitch
+    deleteTokeNN: function(req,res) {
+        UserToken.findOne({ chatID: req.params.chatID }, (error, UserToken) => {
+            if (error) res.status(500).send('500 - Internal Server Error');
+            if (!UserToken) res.status(404).send('404 - UserToken Not Found');
+            UserToken.remove({ chatID: req.params.chatID }, error => {
+              if (error) res.status(500).send('500 - Internal Server Error');
+              res.status(201).send(UserToken)
+            });
         });
-
-        product.save(function(err) {
-            if (err) {
-                console.log(err)
-                res.status(500).send('Product couldn\'t be saved :(');
-            }
-            res.status(201).send(product)
-        })
     },
-
-    getProduct: function(req, res) {
-        Product.findById(req.params.id, function(err, product) {
-            if (err){
-            console.log(err)
-            res.status(500).send('Request couldn\'t be processed :(');
+    
+    deleteToken: function(req, res) {
+        UserToken.findOneAndDelete({ chatID: req.params.chatID },
+            function(err, usertoken) {
+                if (err){
+                    console.log('\x1b[33mThere was an error while looking up the usertoken\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                }
+                if(usertoken != null){
+                    res.status(200).json(usertoken)
+                } else {
+                    console.log('\x1b[33mUser Token of ' + req.params.id + ' Not Found\x1b[0m\n')
+                    res.status(404).send('404 - ChatID Not Found')
+                }
             }
-
-            if(product != null)
-            res.status(200).send(product)
-            else
-            res.status(404).send('Product couldn\'t be found :(');
-
-        })
-    }
+        )
+    },
 }

@@ -1,9 +1,9 @@
 module.exports = {
-    START: `Hey! I\'m here to help you integrate your GitHub account to receive notifications. Type /help to get started.`,
+    START: `Hey! I\'m here to help you manage your repositories issues and receive notifications. Type /help to get started.`,
     SOMETHING_WENT_WRONG: `Something went wrong and I do not know how to handle this...`,
-    USERNAME_NOT_SPECIFIED: `You should specify username. Try to authorize via /auth command again.`,
+    AIRTABLE_TOKEN_NOT_SPECIFIED: `You should specify your AirTable Token. Try to authorize via /auth command again.`,
     GITHUB_TOKEN_NOT_SPECIFIED: `You should specify your GitHub personal token. Try to authorize via /auth command again.`,
-    USERNAME_AND_GITHUB_TOKEN_NOT_SPECIFIED: `You should specify your GitHub username and GitHub personal token in the format "/auth username:token"`,
+    AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED: `You should specify your Airtable personal token and GitHub personal token in the format "/auth airtableToken:githubToken"`,
     REGISTER_SUCCESSFUL: `You have successfully been registered. When you get new notifications, I will send you a message.`,
     USERNAME_ALREADY_REGISTERED: `You are already registered or you are trying to change a personal token of someone else's GitHub profile.`,
     PERSONAL_TOKEN_UPDATED: `Your personal token has successfully been updated.`,
@@ -12,5 +12,5 @@ module.exports = {
     ACCOUNT_UNLINKED: `Your account has successfully been unlinked. You can register a new one via /auth command now.`,
     UNAUTHORIZED: `Seems that your personal token is incorrect, I can't authorize you. In order to prevent annoying messages about it, your user will be deleted from database. Update your token via /auth command if you want to continue using this bot.`,
     ABOUT: `Developer - Luca Martinelli aka lucagump. Check my website lucamartinelli.dev. Follow me on GitHub - https://github.com/lucagump. You can report issues directly to me via Twitter and I'll respond as soon as possible, thanks.`,
-    HELP: `Hi, I\'m here to notify you when something interesting happens on your eagletrt profile. Although, you will need to tell me your username and personal token for me to do that. Call me via /auth username:token command, thanks.`,
+    HELP: `Hi, I\'m here to notify you when something interesting happens on your eagletrt profile. Although, you will need to tell me your username and personal token for me to do that. Call me via "/auth airtableToken:githubToken" command, thanks.`,
 };

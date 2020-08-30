@@ -1,15 +1,15 @@
 swagger: '2.0'
 info:
-  version: '2.2.1'
-  title: "SAFExchange"
-  x-summary: Collection of API provided by the web service PRICE
-  description: This is the API documentation for the __*SAFExchange*__ project.
+  version: '0.0.1'
+  title: "eagle-cms"
+  x-summary: Collection of API provided by the web service
+  description: This is the API documentation for the __*eagle-cms*__ project.
   contact:
-    name: Francesco Bruschetti, Filippo Nardin, Davide Farina
+    name: Luca Martinelli
   license:
     name: MIT
     url: https://github.com/apiaryio/polls-api/blob/master/LICENSE
-host: safexchange.herokuapp.com
+host: eagle-cms.herokuapp.com
 basePath: /
 schemes:
 - https

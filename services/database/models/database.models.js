@@ -1,7 +1,9 @@
 var mongoose = require('mongoose');
 
 var UserToken = new mongoose.Schema({
+    userID: String,
     chatID: String,
+    usernameTelegram: String,
     githubToken: String,
     airtableToken: String
 });

@@ -4,16 +4,11 @@ router = express.Router();
 const telegram_controller = require('./controllers/telegram.controllers');
 
 /*
-	GET		/user
-			/user/BTC
-			/user/ETH
-			/user/USD
-	POST 	/user
-	PUT 	/user/balance
-	DELETE	/plannedaction/:id
+	GET		/test
+	POST 	/send
 */
 
-// a simple test url to check that our app is up and running
+// a simple test url to check that the app is up and running
 router.get('/test', function (req, res) {
     res.send('Hello from the Telegram Route!');
 });

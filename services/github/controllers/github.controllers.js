@@ -1,9 +1,63 @@
 const axios = require('axios')
+var GitHub = require('github-api');
 
 const config = require('../../../config/config.json');
 require('../models/github.models.js');						
 
 const uri = config.github.uri;
+
+function getAllRepos() {
+    return axios.get('https://api.github.com/users/lucagump/repos');
+}
+
+function getRepoInfo(repoName) {
+    return axios.get(`https://api.github.com/repos/lucagump/${repoName}`);
+}
+
+async function fetchAllRepos() {
+    try {
+        const response = await getAllRepos();
+        return response.json();
+    }
+    catch (error) {
+        console.log("Error found", error.message);
+        throw error;
+    }
+}
+
+async function fetchRepoData(repoName) {
+    try {
+        const repo = await getRepoInfo(repoName);
+        return repo.json();
+    }
+    catch (e) {
+        console.log("Error found", e.message);
+        throw e;
+    }
+}
+
+async function test(req){
+    // basic auth
+    var gh = new GitHub({
+        token: req.body.githubToken
+    });
+    
+    var me = gh.getUser();
+    me.listNotifications(function(err, notifications) {
+        console.log(notifications)
+    });
+    var lucagump = gh.getUser('lucagump');
+    lucagump.listStarredRepos(function(err, repos) {
+        console.log(repos)
+    });
+
+    try {
+        const response = await axios.get(app_domain + "/database/token/" + req.params.chatID)
+        return response.data
+    } catch (error) {
+        handleError(error)
+    }  
+}
 
 module.exports = {
 

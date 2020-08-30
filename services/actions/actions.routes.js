@@ -20,9 +20,9 @@ router.get('/test', function (req, res) {
 
 router.get('/sendMessage', actions_controller.sendMessage)
 
-router.get('/addTeam', actions_controller.addTeam)
-
 router.get('/token/:chatID', actions_controller.getTokens)
+
+router.delete('/token/:chatID', actions_controller.deleteTokens)
 
 router.post('/token', actions_controller.storeTokens)
 
