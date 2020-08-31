@@ -23,18 +23,22 @@ telegrambot.use(async (ctx, next) => {
 
 telegrambot.launch()
 
-async function authentication(msg,airtableToken,githubToken){
+async function authentication(msg,airtableToken,githubToken,usernameGitHub,group){
   try {
     const response = await axios.post(app_domain + '/actions/token',{
       userID: msg.from.id,
       chatID: msg.chat.id,
-      username: msg.from.username,
+      usernameTelegram: msg.from.username,
+      usernameGitHub: usernameGitHub,
+      group: group,
       githubToken: githubToken,
       airtableToken: airtableToken
     });
     return response.data
   } catch (error) {
+      var errorMessage = "Something bad just happened! Check your Server " + error.status
       console.log(error)
+      return errorMessage
   }
 }
 
@@ -43,7 +47,31 @@ async function logout(msg){
     const response = await axios.delete(app_domain + '/actions/token/' + msg.chat.id);
     return response.data
   } catch (error) {
-      console.log(error)
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
+
+async function getRepositories(msg){
+  try {
+    const response = await axios.get(app_domain + '/actions/repositories/' + msg.chat.id);
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
+
+async function getIssues(msg){
+  try {
+    const response = await axios.get(app_domain + '/actions/issues/' + msg.chat.id);
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
   }
 }
 
@@ -56,26 +84,35 @@ async function logout(msg){
 //          \/          \/                  \/     \/    \/ 
 // 
 
-// telegrambot.on("polling_error", (err) => console.log(err));
-telegrambot.hears('Assalamualaikum', (ctx) => ctx.reply('Waalaikumsalam'))
-
-telegrambot.hears('hello', (ctx) => {
-  ctx.reply('<b>Hello</b>. <i>How are you today?</i>',
+telegrambot.hears('gitBot', (ctx) => {
+  ctx.reply('Hello <b>' + ctx.from.username + '</b>. Choose the information to see',
     Extra.HTML()
     .markup(Markup.inlineKeyboard([
-      Markup.callbackButton('Not bad', 'not bad'),
-      Markup.callbackButton('All right', 'all right')
+      Markup.callbackButton('Repositories', 'repo'),
+      Markup.callbackButton('Issues', 'issues')
     ])))
 })
 
-telegrambot.action('not bad', (ctx) => {
-  ctx.editMessageText('<i>Have a nice day 😊</i>',
-    Extra.HTML())
+telegrambot.action('repo', async function (ctx) {
+  try {
+    const message = await getRepositories(ctx)
+    console.log('REPO MESSAGE: ' + message)
+    await ctx.reply('message') 
+  } catch (error) {
+    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
 })
 
-telegrambot.action('all right', (ctx) => {
-  ctx.editMessageText('<i>May happiness be with you 🙏</i>',
-    Extra.HTML())
+telegrambot.action('issues', async function (ctx) {
+  try {
+    const message = await getIssues(ctx)
+    console.log('ISSUES MESSAGE: ' + message)
+    await ctx.reply('message') 
+  } catch (error) {
+    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
 })
 
 telegrambot.hears('/test', function (ctx) {
@@ -86,28 +123,15 @@ telegrambot.hears('/test', function (ctx) {
     "\nyour Group ID is: " + ctx.from.id);
 });
 
-telegrambot.hears(/\/authtest/, async function (msg) {
-  try {
-    const message = await authentication(msg)
-    console.log(message)
-    await telegrambot.reply(message.usernameTelegram + "i tuoi token sono stati aggiunti correttamente") 
-  } catch (error) {
-    telegrambot.reply("Error to Handle")
-    console.log(error);
-  }
-});
-
-telegrambot.hears(/\/uptime/, message => {
-  const fromId = message.from.id;
-  const response = "Uptime: "+ startTime.from(moment(), true);
-  console.log(fromId)
-  telegrambot.reply(response);
+telegrambot.hears('/uptime', async function (ctx) {
+  ctx.reply("Uptime: "+ startTime.from(moment(), true));
 });
 
 telegrambot.hears(/\/auth (.*):(.*)|\/auth/, async function (msg, match) {
   const airtableToken = match[1] && match[1].split(':')[0];
   const githubToken = match[2];
-  const telegramId = msg.from.id;
+  const usernameGitHub = 'lucagump';
+  const group = 'Telemetria';
 
   if (!airtableToken && !githubToken) return telegrambot.reply(MESSAGES.AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED);
   if (!airtableToken) return telegrambot.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
@@ -115,11 +139,11 @@ telegrambot.hears(/\/auth (.*):(.*)|\/auth/, async function (msg, match) {
 
   //Check se l'utente è già stato inserito nel db, altrimenti update
   try {
-    const message = await authentication(msg,airtableToken,githubToken)
+    const message = await authentication(msg,airtableToken,githubToken,usernameGitHub,group)
     console.log(message)
-    await telegrambot.reply( message.usernameTelegram + "i tuoi token sono stati aggiunti correttamente") 
+    await ctx.reply( message.usernameTelegram + "i tuoi token sono stati aggiunti correttamente") 
   } catch (error) {
-    telegrambot.reply("Error to Handle")
+    ctx.reply("Error to Handle")
     console.log(error);
   }
 
@@ -152,10 +176,10 @@ telegrambot.hears(/\/auth (.*):(.*)|\/auth/, async function (msg, match) {
   }); */
 });
 
-telegrambot.hears(/\/logout/, async function (msg) {
+telegrambot.hears('/logout', async function (ctx) {
   //Check se l'utente è già stato inserito nel db, altrimenti update
   try {
-    const message = await logout(msg)
+    const message = await logout(ctx)
     console.log(message)
     await telegrambot.reply(MESSAGES.ACCOUNT_UNLINKED) 
     // Se non posso rimuovere
@@ -163,7 +187,7 @@ telegrambot.hears(/\/logout/, async function (msg) {
     // Se non ti trovo
     // if (message.status = "500") telegrambot.sendMessage(msg.chat.id, MESSAGES.SOMETHING_WENT_WRONG);
   } catch (error) {
-    telegrambot.reply( MESSAGES.SOMETHING_WENT_WRONG)
+    telegrambot.reply(MESSAGES.SOMETHING_WENT_WRONG)
     console.log(error);
   }
 });
@@ -182,10 +206,10 @@ telegrambot.hears(/\/addIssue(.*):(.*)|\/addIssue/, function (msg, match) {
 });
 
 
-telegrambot.hears(/\/getissues/, async function (msg) {
+telegrambot.hears('/getissues', async function (ctx) {
   const data  = await getIssuesTest();
   console.log(msg);
-  await telegrambot.reply(data.page)
+  await ctx.reply(data.page)
 });
 
 async function getIssuesTest() {        

@@ -24,6 +24,14 @@ router.get('/token/:chatID', actions_controller.getTokens)
 
 router.delete('/token/:chatID', actions_controller.deleteTokens)
 
+router.get('/repositories/:chatID', actions_controller.getRepositories)
+
+router.get('/issues/:chatID', actions_controller.getIssues)
+
+router.post('/issue', actions_controller.createIssue)
+
 router.post('/token', actions_controller.storeTokens)
+
+router.get('/postman', actions_controller.postman)
 
 module.exports = router;

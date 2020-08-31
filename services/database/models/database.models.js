@@ -1,28 +1,20 @@
 var mongoose = require('mongoose');
 
-var UserToken = new mongoose.Schema({
+var User = new mongoose.Schema({
     userID: String,
-    chatID: String,
+    chatID: {type: String, required: true},
     usernameTelegram: String,
-    githubToken: String,
-    airtableToken: String
+    usernameGithub: {type: String, required: true},
+    group: {type: String, required: true},
+    githubToken: {type: String, required: true},
+    airtableToken: {type: String, required: true}
 });
 
-var UserSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String,
-    github_account: { type: String, unique : true, sparse: true },
-    image_url: String,
+var Group = new mongoose.Schema({
+    group: {type: String, required: true},
+    repositories: [String]
 });
-
-var ProductSchema = new mongoose.Schema({
-    name: {type: String, required: true, max: 100},
-    price: {type: Number, required: true},
-});
-
 
 // Export the model
-mongoose.model('Products', ProductSchema);
-mongoose.model('Users', UserSchema);
-mongoose.model('UserToken', UserToken);
+mongoose.model('Users', User);
+mongoose.model('Groups', Group);

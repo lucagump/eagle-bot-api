@@ -2,7 +2,11 @@ var Airtable = require('airtable');
 
 const config = require('../../../config/config.json');
 
-var base = new Airtable({apiKey: config.airtable.apikey}).base(config.airtable.base);
+function authenticateUser(airTableToken,airTableBase){
+    var base = new Airtable({apiKey: airTableToken}).base(airTableBase);
+    
+    return base
+}
 
 async function getMembers(){ 
     base('Members').select({
@@ -99,15 +103,18 @@ module.exports = {
     },
 
     createTask: function(req, res) {
+        if (req.body.airtableToken != null && req.body.airtableBase != null)
+
+        var base = authenticateUser(airtableToken,airtableBase)
         base('Tasks').create([
             {
               "fields": {
-                "Task": req.title,
+                "Task": req.body.title,
                 "Group": [
-                  req.group
+                  req.body.group
                 ],
-                "Description": req.description,
-                "Priority": req.priority,
+                "Description": req.body.description,
+                "Priority": "",
                 "Status": "",
                 "Assign To": [
                   ""

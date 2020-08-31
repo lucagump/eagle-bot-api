@@ -18,8 +18,8 @@ router.get('/test', function (req, res) {
     res.send('Hello from Github Service!');
 });
 
-router.get('/repositories', github_controller.getRepositories)
+router.get('/repositories/:token', github_controller.getRepositories)
 
-router.get('/issues', github_controller.getIssues)
+router.get('/issues/:token', github_controller.getIssues)
 
 module.exports = router;

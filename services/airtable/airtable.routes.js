@@ -20,6 +20,8 @@ router.get('/test', function (req, res) {
 
 router.get('/members', airtable_controller.getMembers)
 
-router.get('/tasks', airtable_controller.getTasks)
+router.get('/task', airtable_controller.getTasks)
+
+router.post('/task', airtable_controller.createTask)
 
 module.exports = router;

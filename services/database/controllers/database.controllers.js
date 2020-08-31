@@ -28,7 +28,7 @@ mongoose.connect(url,options,
 	});     
 
 var User = mongoose.model('Users');
-var UserToken = mongoose.model('UserToken');
+var Group = mongoose.model('Groups');
 
 module.exports = {
 
@@ -37,68 +37,85 @@ module.exports = {
         res.send('Greetings from the Test method!');
     },
 
-    storeToken: function(req, res) {
+    addUser: function(req, res) {
         if (req.body.chatID =! null) {
-            let usertoken = new UserToken({
+            let user = new User({
                 userID: req.body.userID,
                 chatID: req.body.chatID,
-                usernameTelegram: req.body.username,
+                usernameTelegram: req.body.usernameTelegram,
+                usernameGitHub: req.body.usernameGitHub,
+                group: req.body.group,
                 githubToken: req.body.githubToken,
                 airtableToken: req.body.airtableToken,
             });
-            usertoken.save(function(err) {
+            user.save(function(err) {
                 if (err) {
                     console.log('\x1b[33mThere was an error while saving the usertoken\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 } 
-                res.status(201).send(usertoken)
+                res.status(201).send(user)
             })
         } else {
             res.status(400).send('400 - Bad Request')
         } 
     },
 
-    getToken: function(req, res) {
-        UserToken.findOne({ chatID: req.params.chatID },
-            function(err, usertoken) {
+    addGroup: function(req, res) {
+        if (req.body.group =! null) {
+            let group = new Group({
+                group: req.body.group,
+                repositories: req.body.repositories
+            });
+            group.save(function(err) {
+                if (err) {
+                    console.log('\x1b[33mThere was an error while saving the group\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                } 
+                res.status(201).send(group)
+            })
+        } else {
+            res.status(400).send('400 - Bad Request')
+        } 
+    },
+
+    getUser: function(req, res) {
+        User.findOne({ chatID: req.params.chatID },
+            function(err, user) {
                 if (err){
-                    console.log('\x1b[33mThere was an error while looking up the usertoken\x1b[0m\n')
+                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 }
-                if(usertoken != null){
-                    res.status(200).json(usertoken)
+                if(user != null){
+                    res.status(200).json(user)
                 } else {
-                    console.log('\x1b[33mUser Token of ' + req.params.id + ' Not Found\x1b[0m\n')
+                    console.log('\x1b[33mUser of ' + req.params.id + ' Not Found\x1b[0m\n')
                     res.status(404).send('404 - ChatID Not Found')
                 }
             }
         )
     },
 
-    updateToken: function(req, res) {
+    updateUserToken: function(req, res) {
         if (req.body.chatID =! null) {
-            let usertoken = new UserToken({
-                chatID: req.body.chatID
-            });
             if (req.body.githubToken =! null) {
-                usertoken = {
+                user = {
                     githubToken: req.body.githubToken
                 } 
             }
             if (req.body.airtableToken =! null) {
-                usertoken = {
+                user = {
                     airtableToken: req.body.airtableToken,
                 } 
             }
-            UserToken.findOneAndUpdate({ chatID: req.params.chatID }, usertoken, {new: true}, function(err, userTokenUpdated) {
+            User.findOneAndUpdate({ chatID: req.params.chatID }, user, {new: true}, function(err, user) {
                 if (err) {
                     console.log('\x1b[33mThere was an error while updating the usertoken\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 } 
-                if (userTokenUpdated != null) {
-                    res.status(201).send(userTokenUpdated)
+                if (user != null) {
+                    res.status(201).send(user)
                 } else {
-                    console.log('\x1b[33mUser Token of ' + req.body.chatID + ' Not Found\x1b[0m\n')
+                    console.log('\x1b[33mUser of ' + req.body.chatID + ' Not Found\x1b[0m\n')
                     res.status(404).send('404 - UserToken Not Found')
                 }
             })
@@ -108,10 +125,10 @@ module.exports = {
     },
     // Check se esiste poi check se posso eliminare roasted bitch
     deleteTokeNN: function(req,res) {
-        UserToken.findOne({ chatID: req.params.chatID }, (error, UserToken) => {
+        User.findOne({ chatID: req.params.chatID }, (error, user) => {
             if (error) res.status(500).send('500 - Internal Server Error');
-            if (!UserToken) res.status(404).send('404 - UserToken Not Found');
-            UserToken.remove({ chatID: req.params.chatID }, error => {
+            if (!user) res.status(404).send('404 - UserToken Not Found');
+            User.remove({ chatID: req.params.chatID }, error => {
               if (error) res.status(500).send('500 - Internal Server Error');
               res.status(201).send(UserToken)
             });
@@ -119,16 +136,16 @@ module.exports = {
     },
     
     deleteToken: function(req, res) {
-        UserToken.findOneAndDelete({ chatID: req.params.chatID },
-            function(err, usertoken) {
+        User.findOneAndDelete({ chatID: req.params.chatID },
+            function(err, user) {
                 if (err){
-                    console.log('\x1b[33mThere was an error while looking up the usertoken\x1b[0m\n')
+                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 }
                 if(usertoken != null){
-                    res.status(200).json(usertoken)
+                    res.status(200).json(user)
                 } else {
-                    console.log('\x1b[33mUser Token of ' + req.params.id + ' Not Found\x1b[0m\n')
+                    console.log('\x1b[33mUser ' + req.params.id + ' Not Found\x1b[0m\n')
                     res.status(404).send('404 - ChatID Not Found')
                 }
             }

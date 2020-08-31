@@ -11,6 +11,6 @@ module.exports = {
     CANT_UPDATE_PERSONAL_TOKEN: `I can't update personal token for this user. Maybe it's not your GitHub username?`,
     ACCOUNT_UNLINKED: `Your account has successfully been unlinked. You can register a new one via /auth command now.`,
     UNAUTHORIZED: `Seems that your personal token is incorrect, I can't authorize you. In order to prevent annoying messages about it, your user will be deleted from database. Update your token via /auth command if you want to continue using this bot.`,
-    ABOUT: `Developer - Luca Martinelli aka lucagump. Check my website lucamartinelli.dev. Follow me on GitHub - https://github.com/lucagump. You can report issues directly to me via Twitter and I'll respond as soon as possible, thanks.`,
+    ABOUT: `Developer - Luca Martinelli aka lucagump. Check my website lucamartinelli.dev. Follow me on GitHub - https://github.com/lucagump. You can report issues directly to me and I'll respond as soon as possible, thanks.`,
     HELP: `Hi, I\'m here to notify you when something interesting happens on your eagletrt profile. Although, you will need to tell me your username and personal token for me to do that. Call me via "/auth airtableToken:githubToken" command, thanks.`,
 };

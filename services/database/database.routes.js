@@ -18,11 +18,13 @@ router.get('/test', function (req, res) {
     res.send('Hello from Database Service!');
 });
 
-router.get('/token/:chatID', database_controller.getToken)
+router.get('/user/:chatID', database_controller.getUser)
 
-router.post('/token/', database_controller.storeToken)
+router.post('/user/', database_controller.addUser)
 
-router.delete('/token/:chatID', database_controller.deleteToken)
+router.post('/group/', database_controller.addGroup)
+
+router.delete('/user/:chatID', database_controller.deleteToken)
 
 
 module.exports = router;
