@@ -1,12 +1,11 @@
 var mongoose = require('mongoose');                     
-const config = require('../../../config/config.json');
 require('../models/database.models.js');				
 
-const dbuser = process.env.DB_USER || config.mongodb.dbuser;
-const dbpassword = process.env.DB_PASSWORD || config.mongodb.dbpassword;
-const address = process.env.DB_ADDRESS || config.mongodb.address;
-const dbport = process.env.DB_PORT || config.mongodb.port;
-const dbname = process.env.DB_NAME || config.mongodb.dbname;
+const dbuser = process.env.DB_USER;
+const dbpassword = process.env.DB_PASSWORD;
+const address = process.env.DB_ADDRESS;
+const dbport = process.env.DB_PORT;
+const dbname = process.env.DB_NAME;
 
 // URL on which the DB is stored
 const url = "mongodb://" + dbuser + ":" + dbpassword + "@" + address + ":" + dbport + "/" + dbname;

@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const token = process.env.TELEGRAM_TOKEN || config.telegram.token
+const token = process.env.TELEGRAM_TOKEN
 const url = "https://api.telegram.org/bot" + token 
 
 async function sendMessage(req) {        

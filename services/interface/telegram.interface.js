@@ -5,13 +5,13 @@ const Telegraf = require('telegraf')
 const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 
-// const telegrambot = require('./common/telegram.instance')
 const config = require('../../config/config.json')
 const MESSAGES = require('./common/messages.js')
 
 const startTime = moment();
 
-var token = process.env.TELEGRAM_TOKEN || config.telegram.token;
+const token = process.env.TELEGRAM_TOKEN
+console.log(token)
 const telegrambot = new Telegraf(token)
 
 telegrambot.use(async (ctx, next) => {
@@ -216,7 +216,7 @@ async function getIssuesTest() {
   // URL used to retrieve data dinamically
   let url = config.github.test
   try {
-    const response = await axios.get(url)
+    const response = await axios.get(app_domain + '/actions/')
     console.log(response.data);
     return response.data
   } 

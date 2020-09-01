@@ -1,7 +1,5 @@
 const axios = require('axios')
 
-const config = require('../../../config/config.json');
-
 function handleError(error){
     if (error.response) {
         // The request was made and the server responded with a status code

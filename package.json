@@ -25,7 +25,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "node server.js",
-    "serve": "nodemon server.js",
+    "serve": "nodemon -r dotenv/config server.js dotenv_config_path=./",
     "teleg": "nodemon services/interface/telegram.interface.js"
   },
   "repository": {
