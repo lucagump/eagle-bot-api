@@ -10,9 +10,8 @@ const MESSAGES = require('./common/messages.js')
 
 const startTime = moment();
 
-const token = process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN;// || '1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo';
 
-console.log(token)
 const telegrambot = new Telegraf(token)
 
 telegrambot.use(async (ctx, next) => {

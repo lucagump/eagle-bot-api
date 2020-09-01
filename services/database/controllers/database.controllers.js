@@ -7,6 +7,9 @@ const address = process.env.DB_ADDRESS;
 const dbport = process.env.DB_PORT;
 const dbname = process.env.DB_NAME;
 
+// Documentation
+// https://mongoosejs.com/
+
 // URL on which the DB is stored
 const url = "mongodb://" + dbuser + ":" + dbpassword + "@" + address + ":" + dbport + "/" + dbname;
 
@@ -37,7 +40,7 @@ module.exports = {
     },
 
     addUser: function(req, res) {
-        if (req.body.chatID =! null) {
+        if (req.body.chatID != null) {
             let user = new User({
                 userID: req.body.userID,
                 chatID: req.body.chatID,
@@ -46,9 +49,11 @@ module.exports = {
                 group: req.body.group,
                 githubToken: req.body.githubToken,
                 airtableToken: req.body.airtableToken,
+                airtableBase: req.body.airtableBase
             });
-            user.save(function(err) {
+            user.save(function(err,user) {
                 if (err) {
+                    console.log(err)
                     console.log('\x1b[33mThere was an error while saving the usertoken\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 } 
@@ -77,6 +82,72 @@ module.exports = {
         } 
     },
 
+    getGroups: async function(req, res) {
+        Group.find({},
+            function(err, groups) {
+                if (err){
+                    console.log('\x1b[33mThere was an error while looking up the groups\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                }
+                if(groups != null){
+                    res.status(200).json(groups)
+                } else {
+                    res.status(404).send('404 - groups Not Found')
+                }
+            }
+        )
+    },
+
+    deleteGroup: function(req, res) {
+        Group.findOneAndDelete({ group: req.params.group },
+            function(err, group) {
+                if (err){
+                    console.log('\x1b[33mThere was an error while looking up the group\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                }
+                if(group != null){
+                    res.status(200).json(group)
+                } else {
+                    console.log('\x1b[33mGroup ' + req.params.group + ' Not Found\x1b[0m\n')
+                    res.status(404).send('404 - group Not Found')
+                }
+            }
+        )
+    },
+
+    getGroup: function(req, res) {
+        Groups.findOne({ group: req.params.group },
+            function(err, group) {
+                if (err){
+                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                }
+                if(group != null){
+                    res.status(200).json(group)
+                } else {
+                    console.log('\x1b[Group ' + req.params.group + ' Not Found\x1b[0m\n')
+                    res.status(404).send('404 - Group Not Found')
+                }
+            }
+        )
+    },
+
+    getUsers: async function(req, res) {
+        User.find({},
+            function(err, users) {
+                if (err){
+                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
+                    res.status(500).send('500 - Internal Server Error');
+                }
+                if(users != null){
+                    res.status(200).json(users)
+                } else {
+                    res.status(404).send('404 - Users Not Found')
+                }
+            }
+        )
+    },
+
     getUser: function(req, res) {
         User.findOne({ chatID: req.params.chatID },
             function(err, user) {
@@ -87,14 +158,14 @@ module.exports = {
                 if(user != null){
                     res.status(200).json(user)
                 } else {
-                    console.log('\x1b[33mUser of ' + req.params.id + ' Not Found\x1b[0m\n')
-                    res.status(404).send('404 - ChatID Not Found')
+                    console.log('\x1b[33mUser ' + req.params.chatID + ' Not Found\x1b[0m\n')
+                    res.status(404).send('404 - User Not Found')
                 }
             }
         )
     },
 
-    updateUserToken: function(req, res) {
+    updateUser: function(req, res) {
         if (req.body.chatID =! null) {
             if (req.body.githubToken =! null) {
                 user = {
@@ -123,29 +194,29 @@ module.exports = {
         } 
     },
     // Check se esiste poi check se posso eliminare roasted bitch
-    deleteTokeNN: function(req,res) {
+    deleteUserr: function(req,res) {
         User.findOne({ chatID: req.params.chatID }, (error, user) => {
             if (error) res.status(500).send('500 - Internal Server Error');
-            if (!user) res.status(404).send('404 - UserToken Not Found');
+            if (!user) res.status(404).send('404 - user Not Found');
             User.remove({ chatID: req.params.chatID }, error => {
               if (error) res.status(500).send('500 - Internal Server Error');
-              res.status(201).send(UserToken)
+              res.status(201).send(user)
             });
         });
     },
     
-    deleteToken: function(req, res) {
+    deleteUser: function(req, res) {
         User.findOneAndDelete({ chatID: req.params.chatID },
             function(err, user) {
                 if (err){
                     console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
                     res.status(500).send('500 - Internal Server Error');
                 }
-                if(usertoken != null){
+                if(user != null){
                     res.status(200).json(user)
                 } else {
-                    console.log('\x1b[33mUser ' + req.params.id + ' Not Found\x1b[0m\n')
-                    res.status(404).send('404 - ChatID Not Found')
+                    console.log('\x1b[33mUser ' + req.params.chatID + ' Not Found\x1b[0m\n')
+                    res.status(404).send('404 - user Not Found')
                 }
             }
         )

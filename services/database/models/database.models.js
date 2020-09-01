@@ -4,10 +4,11 @@ var User = new mongoose.Schema({
     userID: String,
     chatID: {type: String, required: true},
     usernameTelegram: String,
-    usernameGithub: {type: String, required: true},
+    usernameGitHub: {type: String, required: true},
     group: {type: String, required: true},
     githubToken: {type: String, required: true},
-    airtableToken: {type: String, required: true}
+    airtableToken: {type: String, required: true},
+    airtableBase: {type: String, required: true}
 });
 
 var Group = new mongoose.Schema({

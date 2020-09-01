@@ -18,20 +18,17 @@ router.get('/test', function (req, res) {
     res.send('Hello from the Business Logic!');
 });
 
-router.get('/sendMessage', actions_controller.sendMessage)
+// da testare
+router.get('/users/:chatID', actions_controller.getUserFromDataBase)
+router.post('/users', actions_controller.addUserToDataBase)
+router.delete('/users/:chatID', actions_controller.deleteUserFromDataBase)
 
-router.get('/token/:chatID', actions_controller.getTokens)
-
-router.delete('/token/:chatID', actions_controller.deleteTokens)
-
-router.get('/repositories/:chatID', actions_controller.getRepositories)
 
 router.get('/issues/:chatID', actions_controller.getIssues)
+router.post('/issues', actions_controller.createIssue)
 
-router.post('/issue', actions_controller.createIssue)
 
-router.post('/token', actions_controller.storeTokens)
-
-router.get('/postman', actions_controller.postman)
+router.get('/repositories/:chatID', actions_controller.getRepositories)
+router.get('/sendMessage', actions_controller.sendMessage)
 
 module.exports = router;

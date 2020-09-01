@@ -4,6 +4,10 @@ var GitHub = require('github-api');
 const config = require('../../../config/config.json');
 require('../models/github.models.js');						
 
+// Documentation
+// https://docs.github.com/en/rest/
+
+
 function authenticateUser(githubToken,){
     var gh = new GitHub({
         token: githubToken
@@ -107,15 +111,46 @@ module.exports = {
         })
     },
 
-    getRepositories: async function(req, res) {
+    getRepositoriesIssues: async function(req, res) {
+        var config = {
+            method: 'get',
+            url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
+            headers: { 
+               Accept: 'application/vnd.github.v3+json',
+                Authorization: `Bearer ${req.body.githubToken}`
+            }
+        };
+        
         try {
-            const data = await getIssues(req.params.token)
-            console.log("data is"+data)
-            res.status(200).send(data);
+            const response = await axios(config)
+            console.log("-> github/getGitHubIssue");
+            res.status(200).send(response.data)
         } catch (error) {
-            console.log(error);
-            res.status(500).send('500 - Internal Server Error')
+            res.status(500).send(error)
+            console.log(error);            
         }
     },
 
+    createGitHubIssue: async function(req, res) {
+
+        var data = JSON.stringify({"title": req.body.title,"body": req.body.description,"labels":req.body.labels});
+        var config = {
+            method: 'post',
+            url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
+            headers: { 
+                Accept: 'application/vnd.github.v3+json',
+                Authorization: `Bearer ${req.body.githubToken}`
+            },
+        data : data
+        };
+        
+        try {
+            const response = await axios(config)
+            console.log("github/createGitHubIssue -> Issue Created");
+            res.status(200).send(response.data)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
+    }
 }

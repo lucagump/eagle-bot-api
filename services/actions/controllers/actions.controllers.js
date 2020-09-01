@@ -1,24 +1,27 @@
 const axios = require('axios')
+const errors = require('../common/errors');
 
 function handleError(error){
+
     if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        //console.log(error.response.data);
-        //console.log(error.response.status);
-        //console.log(error.response.headers);
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
     } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
         // http.ClientRequest in node.js
-        //console.log(error.request);
+        console.log(error.request);
+        //return errors.OK
     } else {
         // Something happened in setting up the request that triggered an Error
         console.log('Error', error.message);
     }
-    //console.log(error.config);
+    //return errors.INTERNALSERVER
+    console.log(error.config);
 }
-
 async function sendMessage(req){
     try {
         const response = await axios.get(app_domain + '/telegram/test')
@@ -48,42 +51,39 @@ async function issues(token){
     }  
 }
 
-async function newGitHubIssue(req,githubToken,repository){
+async function createGitHubIssue(req,githubToken){
     try {
-        const response = await axios.post(app_domain + "/github/issues/",{
-            title: req.body.title,
-            title: req.body.description,
-            repository: req.body.repository,
-            githubToken: req.body.githubToken
+        const response = await axios.post(app_domain + "/github/issues/"+req.body.repository,{
+            'title': req.body.title,
+            'description': req.body.description,
+            'labels': req.body.labels,
+            'repository': req.body.repository,
+            'githubToken': githubToken
         })
-        console.log(response.data)
+        console.log("actions/createGitHubIssue -> Issue Created");
         return response.data
     } catch (error) {
         handleError(error)
     }  
 }
-
-async function newAirTableIssue(req,airtableToken,airtableBase){
+async function createAirTableTask(req,airtableToken,airtableBase){
     try {
-        const response = await axios.post(app_domain + "/airtable/task/",{
-            title: req.body.title,
-            title: req.body.description,
-            group: req.body.group,
-            airtableToken: airtableToken,  
-            airTableBase: airtableBase
+        const response = await axios.post(app_domain + "/airtable/tasks/" + req.body.group,{
+            "title": req.body.title,
+            "desctiption": req.body.description,
+            "airtableToken": airtableToken,  
+            "airtableBase": airtableBase
         })
-        console.log(response.data)
+        console.log("actions/createAirTableTask");
         return response.data
     } catch (error) {
         handleError(error)
     }  
 }
-           
-
-async function storeUserToken(req){
+async function databasePostUser(req){
     try {
-        console.log("actions/storeUserToken -> Token Found");
-        const response = await axios.post(app_domain + '/database/user',{
+        console.log("actions/databasePostUser -> Token Found");
+        const response = await axios.post(app_domain + '/database/users',{
             userID: req.body.userID,
             chatID: req.body.chatID,
             usernameTelegram: req.body.usernameTelegram,
@@ -97,18 +97,18 @@ async function storeUserToken(req){
         handleError(error)
     }
 }
-async function getUserToken(req){
+async function databaseGetUser(req){
     try {
-        console.log("actions/getUserToken -> Token Found");
-        const response = await axios.get(app_domain + "/database/user/" + req.params.chatID)
-        return await response.data
+        const response = await axios.get(app_domain + "/database/users/" + req.body.chatID)
+        console.log("actions/databaseGetUser");
+        return response.data
     } catch (error) {
         handleError(error)
     }  
 }
-async function deleteUserToken(req){
+async function databaseDeleteUser(req){
     try {
-        const response = await axios.delete(app_domain + "/database/user/" + req.params.chatID)
+        const response = await axios.delete(app_domain + "/database/users/" + req.params.chatID)
         console.log("actions/getToken -> Token Found");
         return response.data
 
@@ -120,6 +120,36 @@ async function deleteUserToken(req){
 
 module.exports = {
 
+    addUserToDataBase: async function(req, res) {
+        try {
+            const message = await databasePostUser(req)
+            await res.status(200).send(message);
+        } catch (error) {
+            res.status(500).send('500 - Internal Server Error')
+            console.log(error);
+        }
+    },
+    
+    getUserFromDataBase: async function(req, res) {
+        try {
+            const message = await databaseGetUser(req)
+            res.status(200).send(message);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+
+    deleteUserFromDataBase: async function(req, res) {
+        try {
+            const message = await databaseDeleteUser(req)
+            res.status(200).send(message);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+
     sendMessage: async function(req, res) {
         try {
             const message = await this.sendMessage(req)
@@ -128,27 +158,7 @@ module.exports = {
             res.status(500).send('500 - Internal Server Error')
             console.log(error);
         }
-    },
-
-    storeTokens: async function(req, res) {
-        try {
-            const message = await storeUserToken(req)
-            await res.status(200).send(message);
-        } catch (error) {
-            res.status(500).send('500 - Internal Server Error')
-            console.log(error);
-        }
-    },
-    
-    getTokens: async function(req, res) {
-        try {
-            const message = await getUserToken(req)
-            res.status(200).send(message);
-        } catch (error) {
-            console.log(error);
-            res.status(500).send('500 - Internal Server Error')
-        }
-    },
+    },   
 
     getRepositories: async function(req, res) {
         try {
@@ -163,58 +173,33 @@ module.exports = {
 
     createIssue: async function(req, res) {
         try {
-            const user = await getUserToken(req)
-            const task = await newGitHubIssue(req,user.githubToken)
-            const issue = await newAirTableIssue(req,user.airtableToken,user.airtableBase)
-            await res.status(200).send("ISSUE to check?");
+            const user = await databaseGetUser(req)
+            const githubIssue = await createGitHubIssue(req,user.githubToken)
+            const airtableTask = await createAirTableTask(req,user.airtableToken,user.airtableBase)
+            var response = {
+                "githubIssue": githubIssue.url,
+                "airtableTask": airtableTask.id
+            }
+            await res.status(200).send(response);
         } catch (error) {
             console.log(error);
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
+    // da fare e testare, airtable forse va controllare parametri
     getIssues: async function(req, res) {
         try {
-            const user = await getUserToken(req)
-            const repos = await issues(user.githubToken)
-            await res.status(200).send(repos);
+            const user = await databaseGetUser(req)
+            //const githubIssues = await getGitHubIssues(req,user.githubToken)
+            const airtableTasks = await getAirTableTasks(req,user.airtableToken,user.airtableBase)
+            var response = {
+                "githubIssues": ['githubIssues'],
+                "airtableTasks": airtableTasks
+            }
+            await res.status(200).send(response);
         } catch (error) {
             console.log(error);
             res.status(500).send('500 - Internal Server Error')
         }
-    },
-
-    deleteTokens: async function(req, res) {
-        try {
-            const message = await deleteUserToken(req)
-            res.status(200).send(message);
-        } catch (error) {
-            console.log(error);
-            res.status(500).send('500 - Internal Server Error')
-        }
-    },
-    
-    postman: async function(req, res) {
-
-        var data = JSON.stringify({"title":"Found another bug","body":"I'm having health disease caused by github api.","labels":["bug"]});
-        var config = {
-            method: 'post',
-            url: 'https://api.github.com/repos/eagletrt/telemetria-web-app/issues',
-            headers: { 
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${TOKKKKKEEEEEN}`
-        },
-        data : data
-        };
-
-        axios(config)
-        .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            res.status(200).send(response.data)
-        })
-        .catch(function (error) {
-            res.status(500).send(error)
-            console.log(error);
-        });
     }
 }
