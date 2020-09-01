@@ -10,7 +10,8 @@ const MESSAGES = require('./common/messages.js')
 
 const startTime = moment();
 
-const token = process.env.TELEGRAM_TOKEN
+const token = process.env.TELEGRAM_TOKEN;
+
 console.log(token)
 const telegrambot = new Telegraf(token)
 
@@ -226,9 +227,9 @@ async function getIssuesTest() {
   }
 };
 
-let siteUrl;
 telegrambot.hears(/\/bookmark (.+)/, (msg, match) => {
-  siteUrl = match[1];
+  // passlo come parametro per aggiungere valori 
+  // siteUrl = match[1];
   telegrambot.reply('Got it, in which category?', {
     reply_markup: {
       inline_keyboard: [[
