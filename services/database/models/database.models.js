@@ -13,6 +13,7 @@ var User = new mongoose.Schema({
 
 var Group = new mongoose.Schema({
     group: {type: String, required: true},
+    chat: [String],
     repositories: [String]
 });
 

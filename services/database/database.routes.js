@@ -5,12 +5,12 @@ const database_controller = require('./controllers/database.controllers');
 
 /*
 	GET		/users
-			/users/:chatID
+			/users/:userID
 			/groups/
 			/groups/:group
 	POST 	/users
 	 		/groups
-	DELETE	/users/:chatID
+	DELETE	/users/:userID
 			/groups/:group
 
 */
@@ -22,9 +22,9 @@ router.get('/test', function (req, res) {
 
 // da testare
 router.get('/users/', database_controller.getUsers)
-router.get('/users/:chatID', database_controller.getUser)
+router.get('/users/:userID', database_controller.getUser)
 router.post('/users/', database_controller.addUser)
-router.delete('/users/:chatID', database_controller.deleteUser)
+router.delete('/users/:userID', database_controller.deleteUser)
 
 // da testare
 router.get('/groups', database_controller.getGroups)

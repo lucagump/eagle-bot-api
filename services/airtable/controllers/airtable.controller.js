@@ -70,6 +70,10 @@ module.exports = {
     test: function(req, res) {
         res.send('Greetings from the Test method!');
     },
+    
+    getMembersForm: function (req,res){
+        res.status(200).send('https://airtable.com/shrPh0AMVrQ8CHWpr')
+    },
 
     getMembers: async function(req, res) {
         

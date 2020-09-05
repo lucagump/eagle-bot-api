@@ -20,6 +20,7 @@ router.get('/test', function (req, res) {
 
 router.get('/members', airtable_controller.getMembers)
 
+router.get('/form', airtable_controller.getMembersForm)
 
 router.get('/tasks', airtable_controller.getTasks)
 router.get('/tasks/:group', airtable_controller.getGroupTasks)

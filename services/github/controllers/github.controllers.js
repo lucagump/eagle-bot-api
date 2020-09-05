@@ -1,116 +1,187 @@
 const axios = require('axios')
-var GitHub = require('github-api');
 
 const config = require('../../../config/config.json');
+const { response } = require('express');
 require('../models/github.models.js');						
 
 // Documentation
 // https://docs.github.com/en/rest/
 
 
-function authenticateUser(githubToken,){
-    var gh = new GitHub({
-        token: githubToken
-    });
-    return gh
-}
+function checkRepositoryTopics(repository,topics,repositoryTopics){
+    
+    // for (let i = 0; i < repositoryContainsTag.length; i++) {
+    //     response.push('{'+ repositories[index]+':'+ topics[i] +'}')
+    // }
+    
+    if(repositoryTopics != null){
+        console.log(repository + " " + repositoryTopics)
+        
+        for (let index = 0; index < topics.length; index++) {
+            console.log("topics[index] to check "+topics[index])
+            if (repositoryTopics.includes(topics[index])){
+                toReturn.push(topics[index])
+            } 
+        }
 
-async function getIssues(githubToken) {
+        for (let index = 0; index < topics.length; index++) {
+            if(topicIsContained[index] == true) {
+                repoToReturn.topics[index] = 0;
+            }
+        }
+        return toReturn
+    } else {
+        toReturn = null
+        return toReturn
+    }
+}
+async function getRepositoryTopics(githubToken, repository) {
     try {
-        const response = await axios.get(`https://api.github.com/orgs/eagletrt/issues`, {
+        const response = await axios.get(`https://api.github.com/repos/eagletrt/`+repository+`/topics`, {
+            headers: {
+                'Accept': 'application/vnd.github.mercy-preview+json'
+            },
+            params: {
+                'Authorization': githubToken
+            }
+        });
+        repositoryTopics = response.data.names 
+        return repositoryTopics
+    } catch (error) {
+        console.log(error)
+    }  
+}
+async function getInviteOrganization(req) {
+
+    var data = JSON.stringify({"email": req.body.email});
+    var config = {
+        method: 'post',
+        url: 'https://api.github.com/orgs/eagletrt/invitations',
+        headers: { 
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: `Bearer ${req.body.githubToken}`
+        },
+    data : data
+    };
+    try {
+        const response = await axios(config)
+        if(response.data == null){
+            return "Cannot add User"
+        }
+        return "200 - Invitation Sent Correctly"
+    } catch (error) {
+        console.log(error)
+        //handleError(error)
+    }  
+}
+async function getInviteCollaboration(req) {
+    var config = {
+        method: 'put',
+        url: 'https://api.github.com/repos/eagletrt/' + req.params.repository + '/collaborators/'+ req.params.username,
+        headers: { 
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: `Bearer ${req.body.githubToken}`
+        }
+    };
+    try {
+        const response = await axios(config)
+        return response
+    } catch (error) {
+        console.log(error)
+        //handleError(error)
+    }  
+}
+// OK
+async function getReposistoryNameFromOrganization(githubToken) {
+    var response = []
+    try {
+        const repositories = (await axios.get(`https://api.github.com/orgs/eagletrt/repos`, {
             headers: {
                 'Accept': 'application/vnd.github.v3+json'
             },
             params: {
                 'Authorization': githubToken,
-                'filter': 'all',
-                'state': 'open'
             }
-        });
-        console.log(response.data)
-        return response.data
+        })).data
+        for (let index = 0; index < repositories.length; index++) {
+            response.push(repositories[index].name)
+        }
+        return response   
     } catch (error) {
         console.log(error)
         //handleError(error)
     }  
 }
 
-async function fetchRepoData(repoName) {
-    try {
-        const repo = await getRepoInfo(repoName);
-        return repo.json();
-    }
-    catch (error) {
-        console.log("Error found", e.message);
-        throw error;
-    }
-}
-
-async function getReposistoryFromOrganization(githubToken){
-    var git = authenticateUser(githubToken)
-    try {
-        var response = [] 
-        var organization = await git.getOrganization('eagletrt');
-        var repositories = await organization.getRepos(); 
-        for (let index = 0; index < repositories.length; index++) {
-            response[index] = repositories[index].full_name;                
-        }
-        console.log(response)
-        return await response;
-    }
-    catch (error) {
-        console.log("Error found", error.message);
-        throw error;
-    }
-}
-
 module.exports = {
 
     //Simple version, without validation or sanitation
     test: function(req, res) {
-        res.send('Greetings from the Test method!');
+        res.send('Hello from Github Service!');
     },
 
-    getIssues: function(req, res) {        
-        // URL used to retrieve data dinamically
-        let url = config.github.uri + "orgs/eagletrt/issues";
-        const response = axios.get(url, { 
-            headers: {
-                'Authorization': req.params.token
+    getRepositories: async function(req,res) {
+        try {
+            const response = await getReposistoryNameFromOrganization(req.body.githubToken)
+            console.log("-> github/getRepositories");
+            res.status(200).send(response.data)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
+    },
+    inviteOrganization: async function(req,res) {
+        try {
+            const response = await getInviteOrganization(req)
+            res.status(200).send(response)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
+    },
+    inviteCollaboration: async function(req,res) {
+        try {
+            const response = await getInviteCollaboration(req)
+            if(response.status == 204){
+                response.data="204 - User is already a Collaborator"
             }
-        })
-        .then(function (response) {
-            console.log(response.data);
-            res.status(201).send(response.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
-        .then(function () {
-            console.log("Every time you hit me")
-        })
+            res.status(response.status).send(response.data)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
     },
-
-    getUsers: function(req, res) {        
-        // URL used to retrieve data dinamically
-        let url = uri + "user";
-        const response = axios.get(url, { 
-            headers: {
-                'Authorization': config.github.token
+    getTopics: async function(req,res){
+        try {
+            var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,req.params.repository)   
+            res.status(200).send(repositoryContainsTag)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
+    },
+    getRepositoriesByTopics: async function(req,res){
+        var topics = req.body.topics
+        try {
+            var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
+            //var repositories = ['te','fe','ce','de']
+            
+            
+            for (let index = 0; index < repositories.length; index++) {
+                var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,repositories[index])   
+                var string = '{ "repository" : "' + repositories[index] + '", "topics" : "' + repositoryContainsTag + '"}'      
+                repositoriesTags.push(string)
             }
-        })
-        .then(function (response) {
-            console.log(response.data);
-            res.status(201).send(response.data);
-        })
-        .catch(function (error) {
-        console.log(error);
-        })
-        .then(function () {
-            console.log("Every time you hit me")
-        })
-    },
+            // questa funzione lavora su una singola repo, va scritta per farle entambe
+            //response = checkRepositoryTopics(repositories,topics,repositoryTopics)
+            
+            res.status(200).send(response)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
 
+    },
     getRepositoriesIssues: async function(req, res) {
         var config = {
             method: 'get',
@@ -130,7 +201,6 @@ module.exports = {
             console.log(error);            
         }
     },
-
     createGitHubIssue: async function(req, res) {
 
         var data = JSON.stringify({"title": req.body.title,"body": req.body.description,"labels":req.body.labels});
@@ -152,5 +222,7 @@ module.exports = {
             res.status(500).send(error)
             console.log(error);            
         }
-    }
+    },
+
+    
 }

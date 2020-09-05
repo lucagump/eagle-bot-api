@@ -99,7 +99,7 @@ async function databasePostUser(req){
 }
 async function databaseGetUser(req){
     try {
-        const response = await axios.get(app_domain + "/database/users/" + req.body.chatID)
+        const response = await axios.get(app_domain + "/database/users/" + req.body.userID)
         console.log("actions/databaseGetUser");
         return response.data
     } catch (error) {
@@ -108,12 +108,34 @@ async function databaseGetUser(req){
 }
 async function databaseDeleteUser(req){
     try {
-        const response = await axios.delete(app_domain + "/database/users/" + req.params.chatID)
+        const response = await axios.delete(app_domain + "/database/users/" + req.params.userID)
         console.log("actions/getToken -> Token Found");
         return response.data
 
     } catch (error) {
         console.log(error)
+    }  
+}
+async function sendCollaborationInvite(githubToken,req){
+    try {
+        const response = await axios.put(app_domain + "/github/repositories/"+req.params.repository+"/collaborators/"+req.params.username,{
+            'githubToken': githubToken
+        })
+        console.log("actions/sendCollaborationInvite");
+        return response
+    } catch (error) {
+        handleError(error)
+    }  
+}
+async function sendOrganizationInvite(githubToken,req){
+    try {
+        const response = await axios.post(app_domain + "/github/users/githubInvitation",{
+            'email': req.body.email,
+            'githubToken': githubToken
+        })
+        return response.data
+    } catch (error) {
+        handleError(error)
     }  
 }
             
@@ -165,6 +187,45 @@ module.exports = {
             const user = await getUserToken(req)
             const repos = await repositories(user.githubToken)
             await res.status(200).send(repos);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+
+    addGroup: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req)
+            const repos = await repositories(user.githubToken)
+            // controllo sulle repo il tag divido l'array e faccio in post la chiamata al db
+            //const user = await getUserToken(req)
+            await res.status(200).send(repos);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+
+    inviteCollaboration: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req)
+            const response = await sendCollaborationInvite(user.githubToken,req)
+            if(response.status == 204){
+                response.data="204 - User is already a Collaborator"
+            }
+            res.status(response.status).send(response.data)
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+
+    inviteOrganization: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req)
+            const response = await sendOrganizationInvite(user.githubToken,req)
+            console.log(response)
+            await res.status(200).send(response);
         } catch (error) {
             console.log(error);
             res.status(500).send('500 - Internal Server Error')

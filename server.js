@@ -4,13 +4,13 @@ var cors = require('cors')
 var util = require('util');
 var fs = require('fs');
 
-// var dotenv = require('dotenv');
-// const result = dotenv.config()
-//  
-// if (result.error) {
-//   throw result.error
-// }
-// console.log(result.parsed)
+var dotenv = require('dotenv');
+const result = dotenv.config()
+ 
+if (result.error) {
+  throw result.error
+}
+console.log(result.parsed)
 
 var bodyParser = require('body-parser');
 var morgan = require('morgan'); // log requests to the console (express4)
@@ -20,8 +20,8 @@ var path = require('path');
 // Choose what port to use. If deployed on heroku process.env.PORT will be set and therefore used
 const expressport = process.env.PORT || config.express.port;
 
-// global.app_domain = "http://localhost:" + expressport; 
-global.app_domain = "https://eagle-cms.herokuapp.com";
+global.app_domain = "http://localhost:" + expressport; 
+// global.app_domain = "https://eagle-cms.herokuapp.com";
 
 //app.use(session({ secret: 'shshshshsh', resave: true, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));        // set the static files location /public/img will be /img for users

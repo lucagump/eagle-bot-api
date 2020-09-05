@@ -19,14 +19,17 @@ router.get('/test', function (req, res) {
 });
 
 // da testare
-router.get('/users/:chatID', actions_controller.getUserFromDataBase)
+router.get('/users/:userID', actions_controller.getUserFromDataBase)
 router.post('/users', actions_controller.addUserToDataBase)
-router.delete('/users/:chatID', actions_controller.deleteUserFromDataBase)
-
+router.delete('/users/:userID', actions_controller.deleteUserFromDataBase)
 
 router.get('/issues/:chatID', actions_controller.getIssues)
 router.post('/issues', actions_controller.createIssue)
 
+router.post('/group/:group', actions_controller.addGroup)
+
+router.put('/repositories/:repository/collaborators/:username', actions_controller.inviteCollaboration)
+router.post('/users/githubInvitation', actions_controller.inviteOrganization)
 
 router.get('/repositories/:chatID', actions_controller.getRepositories)
 router.get('/sendMessage', actions_controller.sendMessage)
