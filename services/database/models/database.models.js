@@ -5,7 +5,7 @@ var User = new mongoose.Schema({
     chatID: {type: String, required: true},
     usernameTelegram: String,
     usernameGitHub: {type: String, required: true},
-    group: {type: String, required: true},
+    groups: [{type: String, required: true}],
     githubToken: {type: String, required: true},
     airtableToken: {type: String, required: true},
     airtableBase: {type: String, required: true}

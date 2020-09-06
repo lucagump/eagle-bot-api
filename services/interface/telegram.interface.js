@@ -1,4 +1,4 @@
-var schedule = require('node-schedule')
+const cron = require('node-cron')
 const axios = require('axios')
 const moment = require('moment')
 const Telegraf = require('telegraf')
@@ -23,28 +23,14 @@ telegrambot.use(async (ctx, next) => {
 
 telegrambot.launch()
 
-async function authentication(msg,airtableToken,githubToken,usernameGitHub,group){
-  try {
-    const response = await axios.post(app_domain + '/actions/token',{
-      userID: msg.from.id,
-      chatID: msg.chat.id,
-      usernameTelegram: msg.from.username,
-      usernameGitHub: usernameGitHub,
-      group: group,
-      githubToken: githubToken,
-      airtableToken: airtableToken
-    });
-    return response.data
-  } catch (error) {
-      var errorMessage = "Something bad just happened! Check your Server " + error.status
-      console.log(error)
-      return errorMessage
-  }
-}
+cron.schedule("* */\ * * *", () => {
+  setWebhook()
+}); 
 
 async function setWebhook(){
   try {
     const response = await axios.get('https://api.telegram.org/bot' + token +'/setWebhook' );
+    console.log(response.data)
     return response.data
   } catch (error) {
     var errorMessage = "Webhook not setted! Restart your Server " + error.status
@@ -53,9 +39,35 @@ async function setWebhook(){
   }
 }
 
+async function authentication(msg,airtableToken,airtableBase,githubToken,usernameGitHub,groups){
+  try {
+    const response = await axios.post(app_domain + '/actions/users',{
+      userID: (msg.from.id).toString(),
+      chatID: (msg.chat.id).toString(),
+      usernameTelegram: msg.from.username,
+      usernameGitHub: usernameGitHub,
+      groups: groups,
+      githubToken: githubToken,
+      airtableToken: airtableToken,
+      airtableBase: airtableBase,
+    });
+    if(response.status == 404){
+      return "404 - Cannot add user"
+    }
+    return response.data
+  } catch (error) {
+      var errorMessage = "Something bad just happened! Check your Server " + error.status
+      console.log(error)
+      return errorMessage
+  }
+}
+
 async function logout(msg){
   try {
-    const response = await axios.delete(app_domain + '/actions/users/' + msg.chat.id);
+    const response = await axios.delete(app_domain + '/actions/users/' + msg.from.id);
+    if(response.status == 404){
+      return "404 - Cannot add user"
+    }
     return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -85,7 +97,16 @@ async function getMembers(){
     return errorMessage
   }
 }
-
+async function getRepositories(){
+  try {
+    const response = await axios.get(app_domain + '');
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
 // questa rotta viene usata per creare una issue, generalmente viene creata sia su git che su airtable
 // ma se viene richiesto può essere creata solo su airtable nel caso non sia relativ alla parte software 
 async function createIssue(msg){
@@ -120,7 +141,6 @@ async function assignIssue(msg){
     return errorMessage
   }
 }
-// POST /orgs/{org}/invitations body:{invitee_id: userToAdd}
 async function inviteToOrganization(msg){
   try {
     const response = await axios.post(app_domain + '/actions/users/githubInvitation',{
@@ -133,7 +153,6 @@ async function inviteToOrganization(msg){
     return errorMessage
   }
 }
-// PUT /repos/:owner/:repo/collaborators/:username
 async function inviteToCollaborate(msg){
   username = "lucagump"
   repository = "telemetria-web-app"
@@ -203,7 +222,7 @@ telegrambot.hears('🚀 Create Task and Issue 🚀', async ctx => {
     )  
   
   } catch (error) {
-    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
 })
@@ -217,7 +236,7 @@ telegrambot.hears('Assign Issue 😎', ctx => {
 telegrambot.hears('🤖 Bot Settings 🤖', ctx => {
   ctx.reply(MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED, Markup
     .keyboard([
-      ['Auth', 'Logout'], 
+      ['🤖Authentication', 'Logout😴'], 
       ['Uptime', 'Test', 'Help'] 
     ])
     .oneTime()
@@ -232,7 +251,7 @@ telegrambot.action('repository', async function (ctx) {
     console.log('REPO MESSAGE: ' + message)
     await ctx.reply('message') 
   } catch (error) {
-    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
 })
@@ -243,47 +262,66 @@ telegrambot.action('issues', async function (ctx) {
     console.log('ISSUES MESSAGE: ' + message)
     await ctx.reply('message') 
   } catch (error) {
-    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
 })
 
-// telegrambot.hears(/\/auth (.*):(.*)|\/auth/, async function (msg, match) {
-//   const airtableToken = match[1] && match[1].split(':')[0];
-//   const githubToken = match[2];
-//   const usernameGitHub = 'lucagump';
-//   const group = 'Telemetria';
-
-//   if (!airtableToken && !githubToken) return telegrambot.reply(MESSAGES.AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED);
-//   if (!airtableToken) return telegrambot.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-//   if (!githubToken) return telegrambot.reply( MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
-
-//   //Check se l'utente è già stato inserito nel db, altrimenti update
-//   try {
-//     const message = await authentication(msg,airtableToken,githubToken,usernameGitHub,group)
-//     console.log(message)
-//     await ctx.reply( message.usernameTelegram + "i tuoi token sono stati aggiunti correttamente") 
-//   } catch (error) {
-//     ctx.reply("Error to Handle")
-//     console.log(error);
-//   }
-// });
-
-// telegrambot.hears('logout', async function (ctx) {
-//   //Check se l'utente è già stato inserito nel db, altrimenti update
-//   try {
-//     const message = await logout(ctx)
-//     console.log(message)
-//     await telegrambot.reply(MESSAGES.ACCOUNT_UNLINKED) 
-//     // Se non posso rimuovere
-//     // if (message.status = "500") telegrambot.sendMessage(msg.chat.id, MESSAGES.SOMETHING_WENT_WRONG);
-//     // Se non ti trovo
-//     // if (message.status = "500") telegrambot.sendMessage(msg.chat.id, MESSAGES.SOMETHING_WENT_WRONG);
-//   } catch (error) {
-//     telegrambot.reply(MESSAGES.SOMETHING_WENT_WRONG)
-//     console.log(error);
-//   }
-// });
+telegrambot.hears('🤖Authentication', async function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+  ctx.reply("Ora devi inserire i valori per l'autenticazione, nel seguente formato");
+});
+telegrambot.command('authentication', async function (ctx) {
+  var airtableToken = null;
+  var airtableBase = null;
+  var githubToken = null;
+  var usernameGitHub = null;
+  var groups = [];
+  
+  console.log(ctx.update.message.text)
+  var inputData = ctx.update.message.text.split(" ")
+  console.log(inputData.length)
+  
+  if (inputData.length > 6 ) {
+    airtableToken = inputData[1];
+    airtableBase = inputData[2];
+    githubToken = inputData[3];
+    usernameGitHub = inputData[4];
+    for (let index = 5; index < inputData.length; index++) {
+      groups.push(inputData[index]); 
+    }
+  
+    if (!airtableToken && !githubToken) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED);
+    if (!airtableToken) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    if (!airtableBase) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    if (!githubToken) return ctx.reply( MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
+    if (!groups) return ctx.reply( MESSAGES.GROUPS_NOT_SPECIFIED);
+  
+    //Check se l'utente è già stato inserito nel db, altrimenti update
+    try {
+      const message = await authentication(ctx,airtableToken,airtableBase,githubToken,usernameGitHub,groups)
+      await ctx.reply( ctx.from.username + "i tuoi token sono stati aggiunti correttamente") 
+    } catch (error) {
+      await ctx.reply(ctx.from.username + " " + message + " " + "Error to Handle")
+      console.log(error);
+    } 
+  } else {
+    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+  }
+});
+telegrambot.hears('Logout😴', async function (ctx) {
+  try {
+    const message = await logout(ctx)
+    await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
+    // Se non posso rimuovere
+    // if (message.status = "500") telegrambot.sendMessage(msg.chat.id, MESSAGES.SOMETHING_WENT_WRONG);
+    // Se non ti trovo
+    // if (message.status = "500") telegrambot.sendMessage(msg.chat.id, MESSAGES.SOMETHING_WENT_WRONG);
+  } catch (error) {
+    telegrambot.reply(MESSAGES.SOMETHING_WENT_WRONG)
+    console.log(error);
+  }
+});
 
 telegrambot.hears(/\/addIssue(.*):(.*)|\/addIssue/, function (msg, match) {
   const repo = match[1] && match[1].split('@')[0];
@@ -301,7 +339,7 @@ telegrambot.hears(/\/addIssue(.*):(.*)|\/addIssue/, function (msg, match) {
 
 telegrambot.hears('/getissues', async function (ctx) {
   const data  = await getIssuesTest();
-  console.log(msg);
+  console.log(data);
   await ctx.reply(data.page)
 });
 
@@ -320,15 +358,12 @@ telegrambot.hears('Uptime', async function (ctx) {
 telegrambot.hears('👤 New Member', async function (ctx) {
   try {
     const message = await getAirtableLink()
-    await ctx.reply('Click on the link and fill the <b>Form</b> \n\n' + message, Extra.HTML()) 
+    await ctx.reply('Click on the <i>link</i> and fill the <b>Form</b> \n\n' + message, Extra.HTML()) 
   } catch (error) {
-    ctx.editMessageText('<i>Error to Handle 😊</i>',Extra.HTML())
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
 })
-
-
-
 
 telegrambot.action(/.+/, (ctx) => {
   return ctx.answerCbQuery(`Oh, ${ctx.match[0]}! Great choice`)
@@ -356,19 +391,3 @@ telegrambot.command('custom', ({ reply }) => {
   )
 })
 
-
-var scheduledMessage = schedule.scheduleJob('30 18 * * *', function () {
-  setWebhook()
-});
-
-// *    *    *    *    *    *
-// ┬    ┬    ┬    ┬    ┬    ┬
-// │    │    │    │    │    │
-// │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-// │    │    │    │    └───── month (1 - 12)
-// │    │    │    └────────── day of month (1 - 31)
-// │    │    └─────────────── hour (0 - 23)
-// │    └──────────────────── minute (0 - 59)
-// └───────────────────────── second (0 - 59, OPTIONAL).
-
-// a simple test url to check that our app is up and running

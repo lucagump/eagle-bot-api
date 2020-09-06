@@ -3,6 +3,7 @@ module.exports = {
     SOMETHING_WENT_WRONG: `Something went wrong and I do not know how to handle this...`,
     AIRTABLE_TOKEN_NOT_SPECIFIED: `You should specify your AirTable Token. Try to authorize via /auth command again.`,
     GITHUB_TOKEN_NOT_SPECIFIED: `You should specify your GitHub personal token. Try to authorize via /auth command again.`,
+    GROUPS_NOT_SPECIFIED: `You should specify your gROUPS. Try to authorize via /auth command again.`,
     AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED: `You should specify your Airtable personal token and GitHub personal token in the format "/auth airtableToken:githubToken"`,
     REGISTER_SUCCESSFUL: `You have successfully been registered. When you get new notifications, I will send you a message.`,
     USERNAME_ALREADY_REGISTERED: `You are already registered or you are trying to change a personal token of someone else's GitHub profile.`,

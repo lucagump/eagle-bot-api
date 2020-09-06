@@ -13,6 +13,6 @@ router.get('/test', function (req, res) {
     res.send('Hello from the Telegram Route!');
 });
 
-router.post('/send/', telegram_controller.send)
+router.post('/send', telegram_controller.send)
 
 module.exports = router;

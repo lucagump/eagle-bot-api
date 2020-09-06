@@ -21,9 +21,9 @@ router.get('/test', function (req, res) {
 });
 
 // da testare
-router.get('/users/', database_controller.getUsers)
+router.get('/users', database_controller.getUsers)
 router.get('/users/:userID', database_controller.getUser)
-router.post('/users/', database_controller.addUser)
+router.post('/users', database_controller.addUser)
 router.delete('/users/:userID', database_controller.deleteUser)
 
 // da testare

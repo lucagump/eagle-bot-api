@@ -116,7 +116,9 @@ module.exports = {
     },
 
     addUserCompact: function(req, res) {
-        if (req.body.airtableBase != null && req.body.airtableToken != null && req.body.githubToken != null  && req.body.usernameGitHub != null && req.body.group != null) {
+        // && req.body.airtableToken != null && req.body.githubToken != null  && req.body.usernameGitHub != null && req.body.groups != null
+        console.log(req.body)
+        if (req.body.airtableBase != null ) {
             var isThere = getOne(User, { userID: req.params.userID })
 
             if (isThere[0] == 404){
@@ -126,7 +128,7 @@ module.exports = {
                     chatID: req.body.chatID,
                     usernameTelegram: req.body.usernameTelegram,
                     usernameGitHub: req.body.usernameGitHub,
-                    group: req.body.group,
+                    groups: req.body.groups,
                     githubToken: req.body.githubToken,
                     airtableToken: req.body.airtableToken,
                     airtableBase: req.body.airtableBase
@@ -154,7 +156,7 @@ module.exports = {
                 chatID: req.body.chatID,
                 usernameTelegram: req.body.usernameTelegram,
                 usernameGitHub: req.body.usernameGitHub,
-                group: req.body.group,
+                groups: req.body.groups,
                 githubToken: req.body.githubToken,
                 airtableToken: req.body.airtableToken,
                 airtableBase: req.body.airtableBase
@@ -225,7 +227,7 @@ module.exports = {
     },
 
     getGroup: function(req, res) {
-        Groups.findOne({ group: req.params.group },
+        Group.findOne({ group: req.params.group },
             function(err, group) {
                 if (err){
                     console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')

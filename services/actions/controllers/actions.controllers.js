@@ -68,7 +68,7 @@ async function createGitHubIssue(req,githubToken){
 }
 async function createAirTableTask(req,airtableToken,airtableBase){
     try {
-        const response = await axios.post(app_domain + "/airtable/tasks/" + req.body.group,{
+        const response = await axios.post(app_domain + "/airtable/tasks/" + req.body.groups,{
             "title": req.body.title,
             "desctiption": req.body.description,
             "airtableToken": airtableToken,  
@@ -87,10 +87,11 @@ async function databasePostUser(req){
             userID: req.body.userID,
             chatID: req.body.chatID,
             usernameTelegram: req.body.usernameTelegram,
-            usernameGitHub: req.body.usernameGithub,
-            group: req.body.group,
+            usernameGitHub: req.body.usernameGitHub,
+            groups: req.body.groups,
             githubToken: req.body.githubToken,
-            airtableToken: req.body.githubToken
+            airtableToken: req.body.airtableToken,
+            airtableBase: req.body.airtableBase
          });
         return response.data
     } catch (error) {
