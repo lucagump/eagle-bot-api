@@ -2,7 +2,6 @@ const axios = require('axios')
 const errors = require('../common/errors');
 
 function handleError(error){
-
     if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
@@ -21,6 +20,8 @@ function handleError(error){
     }
     //return errors.INTERNALSERVER
     console.log(error.config);
+    
+    return error 
 }
 async function sendMessage(req){
     try {
@@ -30,17 +31,16 @@ async function sendMessage(req){
         handleError(error)
     }  
 }
-
-async function repositories(token){
+async function githubRepositories(githubToken){
     try {
-        const response = await axios.get(app_domain + "/github/repositories/" + token)
-        console.log(response.data)
+        const response = await axios.get(app_domain + "/github/repositories", {
+            'githubToken': githubToken
+        })
         return response.data
     } catch (error) {
         handleError(error)
     }  
 }
-
 async function issues(token){
     try {
         const response = await axios.get(app_domain + "/github/issues/" + token)
@@ -50,7 +50,6 @@ async function issues(token){
         handleError(error)
     }  
 }
-
 async function createGitHubIssue(req,githubToken){
     try {
         const response = await axios.post(app_domain + "/github/issues/"+req.body.repository,{
@@ -60,7 +59,6 @@ async function createGitHubIssue(req,githubToken){
             'repository': req.body.repository,
             'githubToken': githubToken
         })
-        console.log("actions/createGitHubIssue -> Issue Created");
         return response.data
     } catch (error) {
         handleError(error)
@@ -68,13 +66,12 @@ async function createGitHubIssue(req,githubToken){
 }
 async function createAirTableTask(req,airtableToken,airtableBase){
     try {
-        const response = await axios.post(app_domain + "/airtable/tasks/" + req.body.groups,{
+        const response = await axios.post(app_domain + "/airtable/tasks/" + req.body.group,{
             "title": req.body.title,
             "desctiption": req.body.description,
             "airtableToken": airtableToken,  
             "airtableBase": airtableBase
         })
-        console.log("actions/createAirTableTask");
         return response.data
     } catch (error) {
         handleError(error)
@@ -98,23 +95,42 @@ async function databasePostUser(req){
         handleError(error)
     }
 }
-async function databaseGetUser(req){
+async function getGroupTasks(group,airtableToken,airtableBase){
     try {
-        const response = await axios.get(app_domain + "/database/users/" + req.body.userID)
-        console.log("actions/databaseGetUser");
+        const response = await axios.get(app_domain + '/airtable/tasks/' + group, {
+            airtableToken: airtableToken,  
+            airtableBase: airtableBase
+        })
         return response.data
     } catch (error) {
-        handleError(error)
+        return handleError(error)
+    }  
+}
+async function getTasks(airtableToken,airtableBase){
+    try {
+        const response = await axios.get(app_domain + '/airtable/tasks', {
+            'airtableToken': airtableToken,  
+            'airtableBase': airtableBase
+        })
+        return response.data
+    } catch (error) {
+        return handleError(error)
+    }  
+}
+async function databaseGetUser(userID){
+    try {
+        const response = await axios.get(app_domain + "/database/users/" + userID)
+        return response.data
+    } catch (error) {
+        return handleError(error)
     }  
 }
 async function databaseDeleteUser(req){
     try {
         const response = await axios.delete(app_domain + "/database/users/" + req.params.userID)
-        console.log("actions/getToken -> Token Found");
-        return response.data
-
+        return response
     } catch (error) {
-        console.log(error)
+        handleError(error)
     }  
 }
 async function sendCollaborationInvite(githubToken,req){
@@ -122,7 +138,6 @@ async function sendCollaborationInvite(githubToken,req){
         const response = await axios.put(app_domain + "/github/repositories/"+req.params.repository+"/collaborators/"+req.params.username,{
             'githubToken': githubToken
         })
-        console.log("actions/sendCollaborationInvite");
         return response
     } catch (error) {
         handleError(error)
@@ -152,27 +167,28 @@ module.exports = {
             console.log(error);
         }
     },
-    
     getUserFromDataBase: async function(req, res) {
         try {
-            const message = await databaseGetUser(req)
-            res.status(200).send(message);
+            const response = await databaseGetUser(req.params.userID)
+            res.status(200).send(response);
         } catch (error) {
             console.log(error);
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
     deleteUserFromDataBase: async function(req, res) {
         try {
-            const message = await databaseDeleteUser(req)
-            res.status(200).send(message);
+            const response = await databaseDeleteUser(req)
+            res.status(200).json(response.data)
         } catch (error) {
-            console.log(error);
-            res.status(500).send('500 - Internal Server Error')
+            console.log(error)
+            if(error.status == 404){                
+                res.status(404).send('404 - User not Found')
+            } else {
+                res.status(500).send('500 - Internal Server Error')
+            }
         }
     },
-
     sendMessage: async function(req, res) {
         try {
             const message = await this.sendMessage(req)
@@ -182,22 +198,41 @@ module.exports = {
             console.log(error);
         }
     },   
-
     getRepositories: async function(req, res) {
         try {
-            const user = await getUserToken(req)
-            const repos = await repositories(user.githubToken)
-            await res.status(200).send(repos);
+            const user = await databaseGetUser(req.params.userID)
+            const repositories = await githubRepositories(user.githubToken)
+            await res.status(200).send(repositories);
         } catch (error) {
             console.log(error);
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
+    getGroupTasks: async function(req, res) {
+        try {
+            console.log(req)
+            const user = await databaseGetUser(req.params.userID)
+            const tasks = await getGroupTasks(req.params.group,user.airtableToken,user.airtableBase)
+            await res.status(200).send(tasks);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },    
+    getTasks: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req.params.userID)
+            const tasks = await getTasks(user.airtableToken,user.airtableBase)
+            await res.status(200).send(tasks);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
     addGroup: async function(req, res) {
         try {
-            const user = await databaseGetUser(req)
-            const repos = await repositories(user.githubToken)
+            const user = await databaseGetUser(req.body.userID)
+            const repos = await githubRepositories(user.githubToken)
             // controllo sulle repo il tag divido l'array e faccio in post la chiamata al db
             //const user = await getUserToken(req)
             await res.status(200).send(repos);
@@ -206,10 +241,9 @@ module.exports = {
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
     inviteCollaboration: async function(req, res) {
         try {
-            const user = await databaseGetUser(req)
+            const user = await databaseGetUser(req.body.userID)
             const response = await sendCollaborationInvite(user.githubToken,req)
             if(response.status == 204){
                 response.data="204 - User is already a Collaborator"
@@ -220,10 +254,9 @@ module.exports = {
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
     inviteOrganization: async function(req, res) {
         try {
-            const user = await databaseGetUser(req)
+            const user = await databaseGetUser(req.body.userID)
             const response = await sendOrganizationInvite(user.githubToken,req)
             console.log(response)
             await res.status(200).send(response);
@@ -232,10 +265,35 @@ module.exports = {
             res.status(500).send('500 - Internal Server Error')
         }
     },
-
     createIssue: async function(req, res) {
         try {
-            const user = await databaseGetUser(req)
+            const user = await databaseGetUser(req.body.userID)
+            const githubIssue = await createGitHubIssue(req,user.githubToken)
+            var response = {
+                "githubIssue": githubIssue.url
+            }
+            await res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+    createTask: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req.body.userID)
+            const airtableTask = await createAirTableTask(req,user.airtableToken,user.airtableBase)
+            var response = {
+                "airtableTask": airtableTask.id
+            }
+            await res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('500 - Internal Server Error')
+        }
+    },
+    createIssueTask: async function(req, res) {
+        try {
+            const user = await databaseGetUser(req.body.userID)
             const githubIssue = await createGitHubIssue(req,user.githubToken)
             const airtableTask = await createAirTableTask(req,user.airtableToken,user.airtableBase)
             var response = {
@@ -251,7 +309,7 @@ module.exports = {
     // da fare e testare, airtable forse va controllare parametri
     getIssues: async function(req, res) {
         try {
-            const user = await databaseGetUser(req)
+            const user = await databaseGetUser(req.body.userID)
             //const githubIssues = await getGitHubIssues(req,user.githubToken)
             const airtableTasks = await getAirTableTasks(req,user.airtableToken,user.airtableBase)
             var response = {

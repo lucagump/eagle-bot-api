@@ -119,12 +119,10 @@ module.exports = {
     test: function(req, res) {
         res.send('Hello from Github Service!');
     },
-
     getRepositories: async function(req,res) {
         try {
             const response = await getReposistoryNameFromOrganization(req.body.githubToken)
-            console.log("-> github/getRepositories");
-            res.status(200).send(response.data)
+            res.status(200).send(response)
         } catch (error) {
             res.status(500).send(error)
             console.log(error);            
@@ -194,7 +192,6 @@ module.exports = {
         
         try {
             const response = await axios(config)
-            console.log("-> github/getGitHubIssue");
             res.status(200).send(response.data)
         } catch (error) {
             res.status(500).send(error)
@@ -216,13 +213,10 @@ module.exports = {
         
         try {
             const response = await axios(config)
-            console.log("github/createGitHubIssue -> Issue Created");
             res.status(200).send(response.data)
         } catch (error) {
             res.status(500).send(error)
             console.log(error);            
         }
-    },
-
-    
+    }
 }

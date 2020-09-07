@@ -310,13 +310,13 @@ module.exports = {
             function(err, user) {
                 if (err){
                     console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
+                    res.status(500).send("500 - Internal Server Error");
                 }
                 if(user != null){
-                    res.status(200).json(user)
+                    res.status(200).send(user)
                 } else {
                     console.log('\x1b[33mUser ' + req.params.userID + ' Not Found\x1b[0m\n')
-                    res.status(404).send('404 - user Not Found')
+                    res.status(404).json("404 - User Not Found")
                 }
             }
         )

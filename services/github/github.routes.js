@@ -16,7 +16,7 @@ const github_controller = require('./controllers/github.controllers');
 // a simple test url to check that our app is up and running
 router.get('/test', github_controller.test);
 
-router.get('/repositories/', github_controller.getRepositories)
+router.get('/repositories', github_controller.getRepositories)
 router.get('/repositories/topics', github_controller.getRepositoriesByTopics)
 router.get('/repositories/:repository/topics', github_controller.getTopics)
 
