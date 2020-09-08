@@ -103,9 +103,27 @@ async function inviteToCollaborate(repository,username){
     return errorMessage
   }
 }
-async function getMembers(){
+async function getMembers(msg){
   try {
-    const response = await axios.get(app_domain + '');
+    const response = await axios.get(app_domain + '/actions/groups/members',{
+      data:{
+        userID: msg.from.id
+      }
+    });
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
+async function getMember(msg,username){
+  try {
+    const response = await axios.get(app_domain + '/actions/groups/members/'+username,{
+      data:{
+        userID: msg.from.id
+      }
+    });
     return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -189,10 +207,13 @@ async function createIssueTask(msg,title,description,repository,group){
     return errorMessage
   }
 }
-// prende tutte le issues in todo di airtable, se viene specificato un gruppo ritorna solo quelle del gruppo
-async function getIssues(msg){
+async function getIssues(msg,repository){
   try {
-    const response = await axios.get(app_domain + '');
+    const response = await axios.get(app_domain + '/actions/issues/'+repository,{
+      data:{
+        'userID': (msg.from.id).toString()
+      }
+    });
     return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -200,10 +221,36 @@ async function getIssues(msg){
     return errorMessage
   }
 }
-// repo id-issue user ????
-async function assignIssue(msg){
+async function assignIssue(msg,repository,issueID,username){
   try {
-    const response = await axios.get(app_domain + '');
+    const response = await axios.post(app_domain + '/actions/issues/'+issueID,{
+      userID: (msg.from.id).toString(),
+      username: username,
+      repository: repository
+    });
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
+async function assignTask(msg,taskID,username){
+  try {
+    const response = await axios.post(app_domain + '/actions/tasks/'+taskID,{
+      'userID': (msg.from.id).toString(),
+      'username': username,
+    });
+    return response.data
+  } catch (error) {
+    var errorMessage = "Something bad just happened! Check your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
+}
+async function getRepositoriesGroups(msg){
+  try {
+    const response = await axios.get(app_domain + '/actions/topics/repositories/'+ msg.from.id);
     return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -322,8 +369,27 @@ telegrambot.hears('🚀 Tasks and Issues 🚀', async ctx => {
     await ctx.reply("Select an Action to start",Markup
       .keyboard([
         ['🏎🏁E-Agle Bot🏁🏎'], 
-        ['🔍 Get Tasks', 'New Issue 😎'], 
+        ['🔍 Get Tasks', '⭐️ Assign 📢','New Issue 😎'], 
         ['👤 New Member',  'Add Collab 👨‍💻'],
+        ['🤖 Bot Settings 🤖']
+      ])
+      .oneTime()
+      .resize()
+      .extra()
+    )  
+  
+  } catch (error) {
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
+});
+// TASK AND ISSUES
+telegrambot.hears('⭐️ Assign 📢', async ctx => {
+  try {
+    await ctx.reply("Select an Action to start",Markup
+      .keyboard([
+        ['🚀 Tasks and Issues 🚀'], 
+        ['⭐️ Assign Task', 'Assign Issue 😎'], 
         ['🤖 Bot Settings 🤖']
       ])
       .oneTime()
@@ -422,6 +488,108 @@ telegrambot.command('newtask', async function (ctx) {
     ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
   }
 });
+telegrambot.hears('⭐️ Assign Task', async function (ctx) {
+  return ctx.reply("To assign a task just send the command as describe in the example below: \n\n /assigntask taskID githubUsername")
+});
+telegrambot.hears('Assign Issue 😎', async function (ctx) {
+  return ctx.reply("To assign an issue just send the command as describe in the example below: \n\n /assignissue repository issueID githubUsername")
+});
+telegrambot.command('assigntask', async function (ctx) {
+  var taskID = null;
+  var username = null;
+  
+  var inputData = ctx.update.message.text.split(" ")
+  console.log(inputData)
+  
+  if (inputData.length > 2 ) {
+    taskID = inputData[1]; 
+    username = inputData[2];
+
+    if (!taskID) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    if (!username) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    
+    try {
+      const message = await assignTask(ctx,taskID,username)
+      return await ctx.reply("Task assign to "+ username) 
+    } catch (error) {
+      console.log(error);
+      return await ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())
+    } 
+  } else {
+    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+  }
+});
+telegrambot.command('assignissue', async function (ctx) {
+  var repository = null;
+  var issueID = null;
+  var username = null;
+  
+  var inputData = ctx.update.message.text.split(" ")
+  console.log(inputData)
+  
+  if (inputData.length > 2 ) {
+    repository = inputData[1];
+    issueID = inputData[2]; 
+    username = inputData[3];
+
+    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    if (!issueID) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    if (!username) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    
+    try {
+      const message = await assignIssue(ctx,repository,issueID,username)
+      return await ctx.reply("Issue assign to "+ username) 
+    } catch (error) {
+      console.log(error);
+      return await ctx.reply("Issue: " + issueID + " cannot be assigned",Extra.HTML())
+    } 
+  } else {
+    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+  }
+});
+telegrambot.hears('New Issue 😎', async ctx => {
+  ctx.reply('Here we are! You can create a new issue or a new task as showed below, '+
+  'you can do both using /problem \n\n'+
+  '/newissue / title / description / repository \n' +
+  '/newtask / title / description / group \n' +
+  '/problem / title / description / repository /group \n\n' +
+  '<i>Problems with Repositories and Groups? use /repositories and /groups 😊</i>',Extra.HTML())
+});
+telegrambot.command('groups', async (ctx) => {
+  try {
+    const response = await getGroups(ctx)
+    return ctx.reply('Here are yours Groups: \n\n' + response.groups[0] + "\n" + response.groups[1], Extra.HTML)
+  } catch (error) {
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
+});
+telegrambot.command('members', async (ctx) => {
+  var username = null
+  var text = ''
+  var inputData = ctx.update.message.text.split(" ")
+  
+  if (inputData.length > 1 ) {
+    username = inputData[1];
+  }
+  try {
+    if (username == null){
+      response = await getMembers(ctx)
+      for (var i = 0; i < response.length; i++) {
+          text += response[i].name + ' - tasks: ' + response[i].tasks.length +' \n';
+      }
+      await ctx.reply("Here the Members list \n\n"+text,Extra.HTML()) 
+    } else {
+      response = await getMember(ctx,username)
+      text += '' + response.name + ' tasks: ' + response.tasks.length +' \n';
+      await ctx.reply("Here " + username+ "! \n\n" + text,Extra.HTML()) 
+    }
+
+  } catch (error) {
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
+});
 telegrambot.command('repositories', async function (ctx) {
   try {
     const response = (await getRepositories(ctx)).data
@@ -434,25 +602,37 @@ telegrambot.command('repositories', async function (ctx) {
     ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
-}); // todo
-telegrambot.hears('New Issue 😎', async ctx => {
-  ctx.reply('Here we are! You can create a new issue or a new task as showed below, '+
-  'you can do both using /problem \n\n'+
-  '/newissue / title / description / repository \n' +
-  '/newtask / title / description / group \n' +
-  '/problem / title / description / repository /group \n\n' +
-  '<i>Problems with Repositories and Groups? use /repositories and /group 😊</i>',Extra.HTML())
 });
-telegrambot.action(/.+/, async (ctx) => {
+telegrambot.command('grouprepositories', async function (ctx) {
   try {
-    const response = await getGroupTasks(ctx)
-    ctx.answerCbQuery(`Check the Tasks in ${ctx.match[0]}!`)
-    ctx.reply('TASKS <b>Group</b>', Extra.HTML()) 
+    const response = await getRepositoriesGroups(ctx)    
+    var text = '';
+    for(var k in response) {
+      text += "\n" +  k + '\n\n'; 
+      response[k].forEach(function(element) {
+        text += element + '\n'
+      })    
+    }
+    await ctx.reply("Here a list of yours <b>Repositories</b> \n"+text,Extra.HTML()) 
   } catch (error) {
     ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
-})
+});
+telegrambot.action(/.+/, async (ctx) => {
+  try {
+    const response = await getGroupTasks(ctx)
+    var text = '';
+    for (var i = 0; i < response.length; i++) {
+        text += response[i].task + ' \n';
+    }
+    ctx.answerCbQuery(`Check the Tasks in ${ctx.match[0]}!`)
+    await ctx.reply("Here a list of yours <b>tasks</b> \n\n"+text,Extra.HTML()) 
+  } catch (error) {
+    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+    console.log(error);
+  }
+});
 telegrambot.hears('🔍 Get Tasks', async (ctx) => {
   try {
     const response = await getGroups(ctx)
@@ -466,7 +646,35 @@ telegrambot.hears('🔍 Get Tasks', async (ctx) => {
     ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     console.log(error);
   }
-})
+});
+telegrambot.command('getissues', async function (ctx) {
+  var repository = null;
+  
+  var inputData = ctx.update.message.text.split(" ")
+  console.log(inputData.length)
+  
+  if (inputData.length > 1 ) {
+    repository = inputData[1];
+  
+    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
+    
+    try {
+      const response = await getIssues(ctx,repository)
+      var text = '';
+      
+      response.forEach(element => {
+        text += '>' + element.title + ' \n';
+      });
+      
+      await ctx.reply("Here a list of yours <b>issues</b> \n\n"+text,Extra.HTML()) 
+    } catch (error) {
+      await ctx.reply(response + " " + "Error to Handle")
+      console.log(error);
+    } 
+  } else {
+    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+  }
+});
 
 
 // BOT SETTINGS 
@@ -532,7 +740,7 @@ telegrambot.hears('Logout😴', async function (ctx) {
     //if (message.status = "500") ctx.reply(MESSAGES.SOMETHING_WENT_WRONG);
     // Se non ti trovo
     //if (message.status = "404") ctx.reply(message.data);
-    //await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
+    await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
   } catch (error) {
     ctx.reply(MESSAGES.SOMETHING_WENT_WRONG)
     console.log(error);
@@ -551,16 +759,6 @@ telegrambot.hears('Help👨‍💻', async function (ctx) {
   ctx.reply(MESSAGES.HELP);
 });
 
-
-
-
-
-
-telegrambot.hears('/getissues', async function (ctx) {
-  const data  = await getIssuesTest();
-  console.log(data);
-  await ctx.reply(data.page)
-});
 
 
 

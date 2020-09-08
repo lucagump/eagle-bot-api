@@ -19,6 +19,7 @@ router.get('/test', github_controller.test);
 router.get('/repositories', github_controller.getRepositories)
 router.get('/repositories/topics', github_controller.getRepositoriesByTopics)
 router.get('/repositories/:repository/topics', github_controller.getTopics)
+router.post('/repositories/:repository/issues/:issueID', github_controller.assignGitHubIssue)
 
 router.get('/issues/:repository', github_controller.getRepositoriesIssues)
 router.post('/issues/:repository', github_controller.createGitHubIssue)

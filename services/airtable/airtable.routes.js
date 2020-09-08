@@ -19,13 +19,16 @@ router.get('/test', function (req, res) {
 });
 
 router.get('/members', airtable_controller.getMembers)
+router.get('/groups/:group', airtable_controller.getGroupsMembers)
 router.get('/members/:username', airtable_controller.getMember)
 
 router.get('/form', airtable_controller.getMembersForm)
 
+router.get('/tasks/:taskID', airtable_controller.getTask)
 router.get('/tasks', airtable_controller.getTasks)
 router.get('/tasks/:group', airtable_controller.getGroupTasks)
 router.post('/tasks', airtable_controller.createAirTableTask)
+router.post('/tasks/:taskID', airtable_controller.assignTask)
 router.post('/tasks/:group', airtable_controller.createAirTableTaskGroup)
 
 module.exports = router;

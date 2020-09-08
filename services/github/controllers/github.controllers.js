@@ -7,34 +7,6 @@ require('../models/github.models.js');
 // Documentation
 // https://docs.github.com/en/rest/
 
-
-function checkRepositoryTopics(repository,topics,repositoryTopics){
-    
-    // for (let i = 0; i < repositoryContainsTag.length; i++) {
-    //     response.push('{'+ repositories[index]+':'+ topics[i] +'}')
-    // }
-    
-    if(repositoryTopics != null){
-        console.log(repository + " " + repositoryTopics)
-        
-        for (let index = 0; index < topics.length; index++) {
-            console.log("topics[index] to check "+topics[index])
-            if (repositoryTopics.includes(topics[index])){
-                toReturn.push(topics[index])
-            } 
-        }
-
-        for (let index = 0; index < topics.length; index++) {
-            if(topicIsContained[index] == true) {
-                repoToReturn.topics[index] = 0;
-            }
-        }
-        return toReturn
-    } else {
-        toReturn = null
-        return toReturn
-    }
-}
 async function getRepositoryTopics(githubToken, repository) {
     try {
         const response = await axios.get(`https://api.github.com/repos/eagletrt/`+repository+`/topics`, {
@@ -159,26 +131,39 @@ module.exports = {
         }
     },
     getRepositoriesByTopics: async function(req,res){
-        var topics = req.body.topics
+        var repositories = ['te','fe','ce','de']
+        var repositoryContainsTag = ["volante","telemetria","chimera"]
+        var topics = ["volante","telemetria","fenice"]
+        //var topics = req.body.topics
+        var repositoriesWithTopics = {}
         try {
-            var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
-            //var repositories = ['te','fe','ce','de']
+            // var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
+            // console.log(repositories)
+            repositories.forEach(async function(element) {
+                //var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,element)
+                //console.log(repositoryContainsTag) 
+                var result = []
+                for (let index = 0; index < topics.length; index++) {
+                    if(repositoryContainsTag.includes(topics[index])){
+                        result.push(topics[index])
+                    }
+                }
+                repositoriesWithTopics[element] = result;
+            });
             
-            
-            for (let index = 0; index < repositories.length; index++) {
-                var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,repositories[index])   
-                var string = '{ "repository" : "' + repositories[index] + '", "topics" : "' + repositoryContainsTag + '"}'      
-                repositoriesTags.push(string)
+            //console.log(repositoriesWithTopics)
+            var response = {};
+            for (const key in repositoriesWithTopics) {
+                for (const element of repositoriesWithTopics[key]) {
+                    response[element] = response[element] ? [...response[element], key] : [key];
+                }
             }
-            // questa funzione lavora su una singola repo, va scritta per farle entambe
-            //response = checkRepositoryTopics(repositories,topics,repositoryTopics)
-            
+            //console.log(response)            
             res.status(200).send(response)
         } catch (error) {
             res.status(500).send(error)
             console.log(error);            
         }
-
     },
     getRepositoriesIssues: async function(req, res) {
         var config = {
@@ -189,10 +174,13 @@ module.exports = {
                 Authorization: `Bearer ${req.body.githubToken}`
             }
         };
-        
+        var response = []
         try {
-            const response = await axios(config)
-            res.status(200).send(response.data)
+            const issues = (await axios(config)).data
+            for (let index = 0; index < issues.length; index++) {
+                response.push({"title" : issues[index].title, "description" : issues[index].body})
+            }
+            res.status(200).send(response)
         } catch (error) {
             res.status(500).send(error)
             console.log(error);            
@@ -218,5 +206,27 @@ module.exports = {
             res.status(500).send(error)
             console.log(error);            
         }
+    },
+    assignGitHubIssue: async function(req, res) {
+        try {
+            var data = JSON.stringify({
+                    "assignees": [req.body.username] 
+                });
+            var config = {
+                method: 'post',
+                url: 'https://api.github.com/repos/eagletrt/' + req.params.repository + '/issues/' + req.params.issueID + '/assignees',
+                headers: { 
+                    Accept: 'application/vnd.github.v3+json',
+                    Authorization: `Bearer ${req.body.githubToken}`
+                },
+            data : data
+            };
+            const response = await axios(config)
+            res.status(200).send(response.data)
+        } catch (error) {
+            res.status(500).send(error)
+            console.log(error);            
+        }
     }
+
 }
