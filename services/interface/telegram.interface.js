@@ -14,6 +14,10 @@ const token = '1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo' // process.env.TE
 
 const telegrambot = new Telegraf(token)
 
+// if(process.env.NODE_ENV === 'production') {
+//   telegrambot.webhookReply = true
+// }
+
 telegrambot.use(async (ctx, next) => {
   const start = new Date()
   await next()
@@ -21,23 +25,10 @@ telegrambot.use(async (ctx, next) => {
   console.log(`(Response Time: ${response_time})`)
 })
 
+
+
+
 telegrambot.launch()
-
-cron.schedule("* */1 * * *", () => {
-  setWebhook()
-}); 
-
-async function setWebhook(){
-  try {
-    const response = await axios.get('https://api.telegram.org/bot' + token +'/setWebhook' );
-    console.log(response.data)
-    return response.data
-  } catch (error) {
-    var errorMessage = "Webhook not setted! Restart your Server " + error.status
-    console.log(error)
-    return errorMessage
-  }
-}
 
 async function authentication(msg,airtableToken,airtableBase,githubToken,usernameGitHub,groups){
   try {
