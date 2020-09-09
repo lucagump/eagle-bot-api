@@ -30,7 +30,6 @@ mongoose.connect(url,options,
 	});     
 
 var User = mongoose.model('Users');
-var Group = mongoose.model('Groups');
 
 function save(document){
     document.save(function(err,document) {
@@ -42,7 +41,6 @@ function save(document){
         return [201,document]
     })
 }
-
 function getOne(document,filter){
     document.findOne({ filter },
         function(err, doc) {
@@ -59,7 +57,6 @@ function getOne(document,filter){
         }
     )
 }
-
 function getMany(document){
     document.find({},
         function(err, docs) {
@@ -76,7 +73,6 @@ function getMany(document){
         }
     )
 }
-
 function deleteOne(document,filter){
     document.findOneAndDelete(filter,
         function(err, doc) {
@@ -110,139 +106,42 @@ function updateOne(document,filter, updateDoc){
 
 module.exports = {
 
-    //Simple version, without validation or sanitation
-    test: function(req, res) {
-        res.send('Greetings from the Test method!');
-    },
-
-    addUserCompact: function(req, res) {
-        // && req.body.airtableToken != null && req.body.githubToken != null  && req.body.usernameGitHub != null && req.body.groups != null
-        console.log(req.body)
-        if (req.body.airtableBase != null ) {
-            var isThere = getOne(User, { userID: req.params.userID })
-
-            if (isThere[0] == 404){
-
-                let user = new User({
-                    userID: req.body.userID,
-                    chatID: req.body.chatID,
-                    usernameTelegram: req.body.usernameTelegram,
-                    usernameGitHub: req.body.usernameGitHub,
-                    groups: req.body.groups,
-                    githubToken: req.body.githubToken,
-                    airtableToken: req.body.airtableToken,
-                    airtableBase: req.body.airtableBase
-                });
-        
-                var response = save(user)
-        
-                if (response[0] == 500) {
-                    res.status(response[0]).send('500 - Internal Server Error');
-                } if (response[0] == 201) 
-                    res.status(201).send(response[1])
-            } 
-            if (isThere == 200) {
-                res.status(502).send('502 - User Already added to Data Base' + isThere[1]);
-            }
-        } else {
-            res.status(400).send('400 - Bad Request')
-        } 
-    },
-
     addUser: function(req, res) {
-        if (req.body.userID != null) {
-            let user = new User({
-                userID: req.body.userID,
-                chatID: req.body.chatID,
-                usernameTelegram: req.body.usernameTelegram,
-                usernameGitHub: req.body.usernameGitHub,
-                groups: req.body.groups,
-                githubToken: req.body.githubToken,
-                airtableToken: req.body.airtableToken,
-                airtableBase: req.body.airtableBase
-            });
-            user.save(function(err,user) {
-                if (err) {
-                    console.log(err)
-                    console.log('\x1b[33mThere was an error while saving the usertoken\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
-                } 
-                res.status(201).send(user)
-            })
+        if (req.body.userID != null && req.body.airtableToken != null && req.body.githubToken != null  && req.body.usernameGitHub != null && req.body.groups != null) {   
+            User.findOne({ userID: req.body.userID },
+                function(err, doc) {
+                    if (err){
+                        console.log('\x1b[33mThere was an error while looking up the '+ document + '\x1b[0m\n')
+                        return res.status(500).send('500 - Internal Server Error');
+                    }
+                    if(doc != null){
+                        return res.status(202).send("202 - User is already in database")
+                    } else {
+                        let user = new User({
+                            userID: req.body.userID,
+                            chatID: req.body.chatID,
+                            usernameTelegram: req.body.usernameTelegram,
+                            usernameGitHub: req.body.usernameGitHub,
+                            groups: req.body.groups,
+                            githubToken: req.body.githubToken,
+                            airtableToken: req.body.airtableToken,
+                            airtableBase: req.body.airtableBase
+                        });
+            
+                        user.save(function(err,doc) {
+                            if (err) {
+                                console.log('\x1b[33mThere was an error while saving the usertoken\x1b[0m\n')
+                                return res.status(500).send('500 - Internal Server Error');
+                            } 
+                            return res.status(201).send(doc)
+                        })
+                    }
+                }
+            )
         } else {
-            res.status(400).send('400 - Bad Request')
+            return res.status(400).send('400 - Bad Request')
         } 
     },
-
-    addGroup: function(req, res) {
-        if (req.body.group =! null) {
-            let group = new Group({
-                group: req.body.group,
-                chat: req.body.chatID,
-                repositories: req.body.repositories
-            });
-            group.save(function(err) {
-                if (err) {
-                    console.log('\x1b[33mThere was an error while saving the group\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
-                } 
-                res.status(201).send(group)
-            })
-        } else {
-            res.status(400).send('400 - Bad Request')
-        } 
-    },
-
-    getGroups: async function(req, res) {
-        Group.find({},
-            function(err, groups) {
-                if (err){
-                    console.log('\x1b[33mThere was an error while looking up the groups\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
-                }
-                if(groups != null){
-                    res.status(200).json(groups)
-                } else {
-                    res.status(404).send('404 - groups Not Found')
-                }
-            }
-        )
-    },
-
-    deleteGroup: function(req, res) {
-        Group.findOneAndDelete({ group: req.params.group },
-            function(err, group) {
-                if (err){
-                    console.log('\x1b[33mThere was an error while looking up the group\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
-                }
-                if(group != null){
-                    res.status(200).json(group)
-                } else {
-                    console.log('\x1b[33mGroup ' + req.params.group + ' Not Found\x1b[0m\n')
-                    res.status(404).send('404 - group Not Found')
-                }
-            }
-        )
-    },
-
-    getGroup: function(req, res) {
-        Group.findOne({ group: req.params.group },
-            function(err, group) {
-                if (err){
-                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
-                    res.status(500).send('500 - Internal Server Error');
-                }
-                if(group != null){
-                    res.status(200).json(group)
-                } else {
-                    console.log('\x1b[Group ' + req.params.group + ' Not Found\x1b[0m\n')
-                    res.status(404).send('404 - Group Not Found')
-                }
-            }
-        )
-    },
-
     getUsers: async function(req, res) {
         User.find({},
             function(err, users) {
@@ -258,7 +157,6 @@ module.exports = {
             }
         )
     },
-
     getUser: function(req, res) {
         User.findOne({ userID: req.params.userID },
             function(err, user) {
@@ -273,17 +171,16 @@ module.exports = {
                     res.status(404).send('404 - User Not Found')
                 }
             }
-        )
+        ) 
     },
-
     updateUser: function(req, res) {
-        if (req.body.userID =! null) {
-            if (req.body.githubToken =! null) {
+        if (req.params.userID != null && (req.body.githubToken != null || req.body.airtableToken != null)) {
+            if (req.body.githubToken != null) {
                 userInfo = {
                     githubToken: req.body.githubToken
                 } 
             }
-            if (req.body.airtableToken =! null) {
+            if (req.body.airtableToken != null) {
                 userInfo = {
                     airtableToken: req.body.airtableToken,
                 } 
@@ -294,7 +191,7 @@ module.exports = {
                     res.status(500).send('500 - Internal Server Error');
                 } 
                 if (user != null) {
-                    res.status(201).send(userInfo)
+                    res.status(201).send(user)
                 } else {
                     console.log('\x1b[33mUser of ' + req.body.userID + ' Not Found\x1b[0m\n')
                     res.status(404).send('404 - UserToken Not Found')
@@ -304,33 +201,24 @@ module.exports = {
             res.status(400).send('400 - Bad Request')
         } 
     },
-    
     deleteUser: function(req, res) {
-        User.findOneAndDelete({ userID: req.params.userID },
-            function(err, user) {
-                if (err){
-                    console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
-                    res.status(500).send("500 - Internal Server Error");
+        if (req.params.userID != null) {
+            User.findOneAndDelete({ userID: req.params.userID },
+                function(err, user) {
+                    if (err){
+                        console.log('\x1b[33mThere was an error while looking up the user\x1b[0m\n')
+                        res.status(500).send("500 - Internal Server Error");
+                    }
+                    if(user != null){
+                        res.status(200).send(user)
+                    } else {
+                        console.log('\x1b[33mUser ' + req.params.userID + ' Not Found\x1b[0m\n')
+                        res.status(404).send("404 - User Not Found")
+                    }
                 }
-                if(user != null){
-                    res.status(200).send(user)
-                } else {
-                    console.log('\x1b[33mUser ' + req.params.userID + ' Not Found\x1b[0m\n')
-                    res.status(404).json("404 - User Not Found")
-                }
-            }
-        )
-    },
-
-    // Check se esiste poi check se posso eliminare roasted bitch
-    deleteUserr: function(req,res) {
-        User.findOne({ userID: req.params.userID }, (error, user) => {
-            if (error) res.status(500).send('500 - Internal Server Error');
-            if (!user) res.status(404).send('404 - user Not Found');
-            User.remove({ userID: req.params.userID }, error => {
-                if (error) res.status(500).send('500 - Internal Server Error');
-                res.status(201).send(user)
-            });
-        });
-    },
+            )
+        } else {
+            return res.status(400).send('400 - Bad Request')
+        } 
+    }
 }

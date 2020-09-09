@@ -6,32 +6,16 @@ const database_controller = require('./controllers/database.controllers');
 /*
 	GET		/users
 			/users/:userID
-			/groups/
-			/groups/:group
 	POST 	/users
-	 		/groups
+	PUT 	/users/userID
 	DELETE	/users/:userID
-			/groups/:group
 
 */
 
-// a simple test url to check that our app is up and running
-router.get('/test', function (req, res) {
-    res.send('Hello from Database Service!');
-});
-
-// da testare
 router.get('/users', database_controller.getUsers)
 router.get('/users/:userID', database_controller.getUser)
 router.post('/users', database_controller.addUser)
+router.put('/users/:userID', database_controller.updateUser)
 router.delete('/users/:userID', database_controller.deleteUser)
-
-// da testare
-router.get('/groups', database_controller.getGroups)
-router.get('/groups/:group', database_controller.getGroup)
-router.post('/groups', database_controller.addGroup)
-router.delete('/groups/:group', database_controller.deleteGroup)
-
-
 
 module.exports = router;

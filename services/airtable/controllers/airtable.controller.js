@@ -2,77 +2,38 @@ var Airtable = require('airtable');
 
 const config = require('../../../config/config.json');
 
-function authenticateUser(airTableToken,airTableBase){
-    var base = new Airtable({apiKey: airTableToken}).base(airTableBase);  
-    return base
-}
-
-async function getMembers(){ 
-    base('Members').select({
-        view: "Full Grid",
-        cellFormat: "json",
-    }).eachPage(function page(records, fetchNextPage) {
-        // This function (`page`) will get called for each page of records.
-    
-        records.forEach(function(record) {
-            console.log(record.get('Name') + " Tasks Assigned "+ record.get('Tasks'));
-        });
-    
-        // To fetch the next page of records, call `fetchNextPage`.
-        // If there are more records, `page` will get called again.
-        // If there are no more records, `done` will get called.
-        fetchNextPage();
-    
-    }, function done(err) {
-        if (err) { 
-            console.error(err); return; 
-        } else {
-            return records;
-        }
-    });
-};
-
-async function getTasks() {
-    base('Tasks').select({
-        view: "Full Grid",
-        cellFormat: "json",
-    }).eachPage(function page(records, fetchNextPage) {
-        // This function (`page`) will get called for each page of records.
-    
-        records.forEach(function(record) {
-            console.log('Retrieved', record.get('Assign To'));
-        });
-
-        // To fetch the next page of records, call `fetchNextPage`.
-        // If there are more records, `page` will get called again.
-        // If there are no more records, `done` will get called.
-        fetchNextPage();
-    
-    }, function done(err) {
-        if (err) { 
-            console.error(err); return; 
-        } else {
-            return records;
-        }
-    });    
-};
-
-async function findRecord(table, recordID){
-    base(table).find(recordID, function(err, record) {
-        if (err) { console.error(err); return; }
-        console.log('Retrieved', record.id);
-    })
-}
-
 module.exports = {
-
-    //Simple version, without validation or sanitation
-    test: function(req, res) {
-        res.send('Greetings from the Test method!');
-    },
-    
+ 
     getMembersForm: function (req,res){
         res.status(200).send('https://airtable.com/shrPh0AMVrQ8CHWpr')
+    },    
+    
+    getMember: async function(req,res){
+        if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.username){
+            var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
+            
+            try {
+                const record = await base('Members')
+                    .select({filterByFormula: "{Git Hub} = '" + req.params.username + "'"})
+                    .firstPage();
+                    
+                    if(record[0] == null){
+                        return res.status(404).send("404 - Memeber not Found")
+                    }
+                    
+                    var response = {
+                        id: record[0].id,
+                        name: record[0].fields.Collaborator.name,
+                        tasks: record[0].fields.Tasks,
+                        groups: record[0].fields.Group,
+                    }
+                res.status(200).send(response)
+            } catch (err) {
+                return res.status(err.statusCode).send(err);
+            }
+        } else {
+            res.status(400).send("400 - Bad Request")
+        }
     },
     getMembers: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null){
@@ -82,9 +43,12 @@ module.exports = {
                 const records = await base('Members')
                     .select()
                     .firstPage();
-
+                
+                if(records == null){
+                    return res.status(404).send("404 - Members not Found")
+                }
+                
                 records.forEach(element => {
-                    console.log(element)
                     response.push({
                         id: element.id, 
                         name: element.fields.Collaborator.name,
@@ -93,10 +57,9 @@ module.exports = {
                     }) 
                 });
 
-                res.status(201).send(response)
+                res.status(200).send(response)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request")
@@ -122,48 +85,25 @@ module.exports = {
                     }
                 });
 
-                res.status(201).send(response)
+                res.status(200).send(response)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request")
         }
     },
-    getMember: async function(req,res){
-        console.log(req.body.airtableToken+" "+req.body.airtableBase)
-        if (req.body.airtableToken != null && req.body.airtableBase != null){
-            var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            
-            try {
-                const record = await base('Members')
-                    .select({filterByFormula: "{Git Hub} = '" + req.params.username + "'"})
-                    .firstPage();
-                    var response = {
-                        id: record[0].id,
-                        name: record[0].fields.Collaborator.name,
-                        tasks: record[0].fields.Tasks,
-                        groups: record[0].fields.Group,
-                    }
-                res.status(201).send(response)
-            } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
-            }
-        } else {
-            res.status(400).send("400 - Bad Request")
-        }
-    },
+    
     getTask: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.taskID != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            var response = []
+            
             try {
                 const task = await base('Tasks').find(req.params.taskID)
-                res.status(200).send(task)
+
+                task.fields.id = task.id
+                res.status(200).send(task.fields)
             } catch (err) {
-                console.error(err);
                 return res.status(err.statusCode).send(err);
             }
         } else {
@@ -174,58 +114,62 @@ module.exports = {
         if (req.body.airtableToken != null && req.body.airtableBase != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
             var response = []
+            
             try {
-                const records = await base('Tasks')
-                    .select()
-                    .firstPage();
+                const records = await base('Tasks').select().firstPage();
 
                 records.forEach(element => {
                     response.push(element.fields.Task) 
                 });
 
-                res.status(201).send(response)
+                res.status(200).send(response)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request")
         }
     },
     getGroupTasks: async function(req,res){
-        console.log(req.body)
-        if (req.body.airtableToken && req.body.airtableBase){
+        if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.group != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            var response = []
             try {
-                var records = await base('Tasks')
-                    .select(/*{filterByFormula: "{Group} = '" + req.params.group + "'"}*/)
-                    .firstPage();
-                console.log(records)
+                var records = await base('Tasks').select().firstPage();
+                   
+                var response = []
                 records.forEach(element => {
-                    if(element.fields.Group.includes(req.params.group)){
-                        response.push({task: element.fields.Task, description: element.fields.Description}) 
+                    if(element.fields.Group != null) {
+                        if(element.fields.Group.includes(req.params.group)){
+                            response.push({
+                                id: element.id,
+                                task: element.fields.Task, 
+                                description: element.fields.Description
+                            }) 
+                        }
                     }
                 });
 
                 res.status(201).send(response)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                console.log(err)
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request: " + req.body.airtableBase+" and "+req.body.airtableToken)
         }
     },
+
     createAirTableTask: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null && req.body.title != null){
             
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
             
             var members = await base('Members')
-                    .select()
-                    .firstPage();
+                .select()
+                .firstPage();
+            
             var membersInfos = []
+            
             members.forEach(element => {
                 membersInfos.push({
                     id: element.id, 
@@ -248,10 +192,10 @@ module.exports = {
                         "Status": "🧪In Box🔨",
                         "AssignTo": [minTask.id]
                     });
-                res.status(201).send(newTask)
+                newTask.fields.id = newTask.id
+                res.status(201).send(newTask.fields)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request")
@@ -276,12 +220,14 @@ module.exports = {
                         })
                     } 
                 });
+                if(membersInfos[0] == null){
+                    res.status(400).send("400 - Bad Request")
+                }
                 var minTask = membersInfos[0];      
             
                 for (i = 0; i < membersInfos.length; i++){
                     if (minTask.tasks.length > (membersInfos[i].tasks).length) {
                         minTask = membersInfos[i];
-                        console.log(minTask)
                     }
                 }
                 const newTask = await base('Tasks').create({
@@ -293,15 +239,16 @@ module.exports = {
                         "Status": "🧪In Box🔨",
                         "AssignTo": [minTask.id]
                     });
-                res.status(201).send(newTask)
+                    newTask.fields.id = newTask.id
+                res.status(201).send(newTask.fields)
             } catch (err) {
-                console.error(err);
-                return res.status(500).send("500 - Internal Server Error");
+                return res.status(err.statusCode).send(err);
             }
         } else {
             res.status(400).send("400 - Bad Request")
         }
     },
+    
     assignTask: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.taskID && req.body.username != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
@@ -328,13 +275,13 @@ module.exports = {
                     "Group": task.fields.Group,
                     "AssignTo": task.fields.AssignTo
                 });
-                res.status(201).send(taskUpdated)
+                taskUpdated.fields.id = taskUpdated.id
+
+                res.status(201).send(taskUpdated.fields)
             } catch (err) {
-                console.error(err);
                 return res.status(err.statusCode).send(err);
             }
         } else {
-            console.log("something")
             res.status(400).send("400 - Bad Request")
         }
     }

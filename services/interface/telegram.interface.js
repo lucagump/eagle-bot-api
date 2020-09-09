@@ -10,7 +10,7 @@ const MESSAGES = require('./common/messages.js')
 
 const startTime = moment();
 
-const token = process.env.TELEGRAM_TOKEN;// || '1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo';
+const token = '1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo' // process.env.TELEGRAM_TOKEN;
 
 const telegrambot = new Telegraf(token)
 
@@ -28,15 +28,15 @@ cron.schedule("* */1 * * *", () => {
 }); 
 
 async function setWebhook(){
-  // try {
-  //   const response = await axios.get('https://api.telegram.org/bot' + token +'/setWebhook' );
-  //   console.log(response.data)
-  //   return response.data
-  // } catch (error) {
-  //   var errorMessage = "Webhook not setted! Restart your Server " + error.status
-  //   console.log(error)
-  //   return errorMessage
-  // }
+  try {
+    const response = await axios.get('https://api.telegram.org/bot' + token +'/setWebhook' );
+    console.log(response.data)
+    return response.data
+  } catch (error) {
+    var errorMessage = "Webhook not setted! Restart your Server " + error.status
+    console.log(error)
+    return errorMessage
+  }
 }
 
 async function authentication(msg,airtableToken,airtableBase,githubToken,usernameGitHub,groups){
@@ -98,9 +98,7 @@ async function inviteToCollaborate(repository,username){
     const response = await axios.put(app_domain + '/actions/repositories/'+repository+'/collaborators/'+username);
     return response.data
   } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
+    return error.message
   }
 }
 async function getMembers(msg){
@@ -143,7 +141,7 @@ async function getGroups(msg){
 } 
 async function getGroupTasks(msg){
   try {
-    const response = await axios.get(app_domain + '/actions/tasks/'+msg.match[0]+'/'+msg.from.id);
+    const response = await axios.get(app_domain + '/actions/tasks/groups/'+msg.match[0]+'/'+msg.from.id);
     return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -237,14 +235,15 @@ async function assignIssue(msg,repository,issueID,username){
 }
 async function assignTask(msg,taskID,username){
   try {
-    const response = await axios.post(app_domain + '/actions/tasks/'+taskID,{
+    const response = await axios.put(app_domain + '/actions/tasks/'+taskID,{
       'userID': (msg.from.id).toString(),
       'username': username,
     });
-    return response.data
+    console.log(response)
+    return response
   } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
     console.log(error)
+    var errorMessage = "Something bad just happened! Check your Server"
     return errorMessage
   }
 }
@@ -305,7 +304,8 @@ telegrambot.hears('👤 New Member', async function (ctx) {
 });
 telegrambot.hears('Add Collab 👨‍💻', async function (ctx) {
   await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-  ctx.reply("Ora devi inserire username e repository, nel seguente formato");
+  ctx.reply("Send the command in this format:\n\n"+
+    "/collaboration username repository");
 });
 telegrambot.command('collaboration', async function (ctx) {
   var username = null;
@@ -318,14 +318,10 @@ telegrambot.command('collaboration', async function (ctx) {
     username = inputData[1];
     repository = inputData[2];
   
-    if (!username && !repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED);
-    if (!username) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
-    //Check se l'utente è già stato inserito nel db, altrimenti update
     try {
       const message = await inviteToCollaborate(repository,username)
-      await ctx.reply(username + "has been invited to collaborate in "+repository) 
+      ctx.reply(message) 
+      //ctx.reply(username + " has been invited to collaborate in "+repository) 
     } catch (error) {
       await ctx.reply(username + " " + message + " " + "Error to Handle")
       console.log(error);
@@ -336,7 +332,8 @@ telegrambot.command('collaboration', async function (ctx) {
 });
 telegrambot.hears('Join Org🤝', async function (ctx) {
   await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-  ctx.reply("Ora devi inserire la email nel seguente formato");
+  ctx.reply("Send the command in this format: \n\n"+
+    "/organization email");
 });
 telegrambot.command('organization', async function (ctx) {
   var email = null;
@@ -383,7 +380,7 @@ telegrambot.hears('🚀 Tasks and Issues 🚀', async ctx => {
     console.log(error);
   }
 });
-// TASK AND ISSUES
+// TASK AND ISSUES - ASSIGN TASK / ASSIGN ISSUE
 telegrambot.hears('⭐️ Assign 📢', async ctx => {
   try {
     await ctx.reply("Select an Action to start",Markup
@@ -402,6 +399,7 @@ telegrambot.hears('⭐️ Assign 📢', async ctx => {
     console.log(error);
   }
 });
+
 telegrambot.command('problem', async function (ctx) {
   var title = null;
   var description = null;
@@ -505,15 +503,13 @@ telegrambot.command('assigntask', async function (ctx) {
     taskID = inputData[1]; 
     username = inputData[2];
 
-    if (!taskID) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!username) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
     try {
       const message = await assignTask(ctx,taskID,username)
-      return await ctx.reply("Task assign to "+ username) 
+      console.log(message)
+      return ctx.reply(message.data) 
     } catch (error) {
       console.log(error);
-      return await ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())
+      return ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())
     } 
   } else {
     ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
@@ -555,6 +551,7 @@ telegrambot.hears('New Issue 😎', async ctx => {
   '/problem / title / description / repository /group \n\n' +
   '<i>Problems with Repositories and Groups? use /repositories and /groups 😊</i>',Extra.HTML())
 });
+//OK
 telegrambot.command('groups', async (ctx) => {
   try {
     const response = await getGroups(ctx)
@@ -564,6 +561,7 @@ telegrambot.command('groups', async (ctx) => {
     console.log(error);
   }
 });
+// OK
 telegrambot.command('members', async (ctx) => {
   var username = null
   var text = ''
@@ -647,6 +645,7 @@ telegrambot.hears('🔍 Get Tasks', async (ctx) => {
     console.log(error);
   }
 });
+// OK
 telegrambot.command('getissues', async function (ctx) {
   var repository = null;
   
@@ -655,8 +654,6 @@ telegrambot.command('getissues', async function (ctx) {
   
   if (inputData.length > 1 ) {
     repository = inputData[1];
-  
-    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
     
     try {
       const response = await getIssues(ctx,repository)
@@ -692,7 +689,9 @@ telegrambot.hears('🤖 Bot Settings 🤖', async ctx => {
 });
 telegrambot.hears('🤖Authentication', async function (ctx) {
   await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-  ctx.reply("Ora devi inserire i valori per l'autenticazione, nel seguente formato");
+  ctx.reply("Send the command in this format:"+
+    "/authentication airtableToken airtableBase githubToken usernameGitHub group1 group2"
+  );
 });
 telegrambot.command('authentication', async function (ctx) {
   var airtableToken = null;
@@ -713,13 +712,7 @@ telegrambot.command('authentication', async function (ctx) {
     for (let index = 5; index < inputData.length; index++) {
       groups.push(inputData[index]); 
     }
-  
-    if (!airtableToken && !githubToken) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_AND_GITHUB_TOKEN_NOT_SPECIFIED);
-    if (!airtableToken) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!airtableBase) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!githubToken) return ctx.reply( MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED);
-    if (!groups) return ctx.reply( MESSAGES.GROUPS_NOT_SPECIFIED);
-  
+
     //Check se l'utente è già stato inserito nel db, altrimenti update
     try {
       const message = await authentication(ctx,airtableToken,airtableBase,githubToken,usernameGitHub,groups)

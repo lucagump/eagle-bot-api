@@ -11,16 +11,17 @@ async function getRepositoryTopics(githubToken, repository) {
     try {
         const response = await axios.get(`https://api.github.com/repos/eagletrt/`+repository+`/topics`, {
             headers: {
-                'Accept': 'application/vnd.github.mercy-preview+json'
-            },
-            params: {
-                'Authorization': githubToken
+                'Accept': 'application/vnd.github.mercy-preview+json',
+                'Authorization': `Bearer ${githubToken}`
             }
         });
         repositoryTopics = response.data.names 
         return repositoryTopics
     } catch (error) {
-        console.log(error)
+        var response = []
+        response.status = error.response.status 
+        response.message = error.response.data.message 
+        return response
     }  
 }
 async function getInviteOrganization(req) {
@@ -37,13 +38,12 @@ async function getInviteOrganization(req) {
     };
     try {
         const response = await axios(config)
-        if(response.data == null){
-            return "Cannot add User"
-        }
         return "200 - Invitation Sent Correctly"
     } catch (error) {
-        console.log(error)
-        //handleError(error)
+        var response = []
+        response.status = error.response.status 
+        response.message = error.response.data.message 
+        return response
     }  
 }
 async function getInviteCollaboration(req) {
@@ -59,173 +59,223 @@ async function getInviteCollaboration(req) {
         const response = await axios(config)
         return response
     } catch (error) {
-        console.log(error)
-        //handleError(error)
+        var response = []
+        response.status = error.response.status 
+        response.message = error.response.data.message 
+        return response
     }  
 }
-// OK
 async function getReposistoryNameFromOrganization(githubToken) {
     var response = []
     try {
         const repositories = (await axios.get(`https://api.github.com/orgs/eagletrt/repos`, {
             headers: {
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            params: {
-                'Authorization': githubToken,
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `Bearer ${githubToken}`
             }
         })).data
+        
         for (let index = 0; index < repositories.length; index++) {
             response.push(repositories[index].name)
         }
+        
         return response   
     } catch (error) {
-        console.log(error)
-        //handleError(error)
+        response.status = error.response.status 
+        response.message = error.response.data.message 
+        return response
     }  
 }
 
+
 module.exports = {
 
-    //Simple version, without validation or sanitation
-    test: function(req, res) {
-        res.send('Hello from Github Service!');
-    },
+
     getRepositories: async function(req,res) {
-        try {
-            const response = await getReposistoryNameFromOrganization(req.body.githubToken)
-            res.status(200).send(response)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        if (req.body.githubToken != null) {       
+            try {
+                const response = await getReposistoryNameFromOrganization(req.body.githubToken)
+                
+                if(response.status != null){
+                    return res.status(response.status).send(response.status + " " + response.message)
+                }        
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')
+            }
+        } else {
+            return res.status(400).send('400 - Bad Request')
         }
     },
     inviteOrganization: async function(req,res) {
-        try {
-            const response = await getInviteOrganization(req)
-            res.status(200).send(response)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        if (req.body.githubToken != null && req.body.email) {       
+            try {
+                const response = await getInviteOrganization(req)
+                if(response.status != null){
+                    return res.status(response.status).send(response.status + " " + response.message)
+                }        
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')
+            }
+        } else {
+            return res.status(400).send('400 - Bad Request')
         }
     },
     inviteCollaboration: async function(req,res) {
-        try {
-            const response = await getInviteCollaboration(req)
-            if(response.status == 204){
-                response.data="204 - User is already a Collaborator"
+        if (req.body.githubToken != null && req.params.repository != null && req.params.username) {       
+            try {
+                const response = await getInviteCollaboration(req)
+                if(response.status == 204){
+                    return res.status(204).send("User is already a Collaborator")
+                }        
+                res.status(response.status).send(response.statusText+" - User has been invited")
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')
             }
-            res.status(response.status).send(response.data)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        }else{
+            return res.status(400).send('400 - Bad Request')
         }
     },
     getTopics: async function(req,res){
-        try {
-            var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,req.params.repository)   
-            res.status(200).send(repositoryContainsTag)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        if (req.body.githubToken != null && req.params.repository != null) {       
+            try {
+                var response = await getRepositoryTopics(req.body.githubToken,req.params.repository)   
+                if(response.status != null){
+                    return res.status(response.status).send(response.status + " " + response.message)
+                }     
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')     
+            }
+        }else{
+            return res.status(400).send('400 - Bad Request')
         }
     },
     getRepositoriesByTopics: async function(req,res){
-        var repositories = ['te','fe','ce','de']
-        var repositoryContainsTag = ["volante","telemetria","chimera"]
-        var topics = ["volante","telemetria","fenice"]
-        //var topics = req.body.topics
-        var repositoriesWithTopics = {}
-        try {
-            // var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
-            // console.log(repositories)
-            repositories.forEach(async function(element) {
-                //var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,element)
-                //console.log(repositoryContainsTag) 
-                var result = []
-                for (let index = 0; index < topics.length; index++) {
-                    if(repositoryContainsTag.includes(topics[index])){
-                        result.push(topics[index])
+        if (req.body.githubToken != null) {       
+            var repositories = ['eagletrt.github.io','chimera-steeringwheel','chimera-bms','chimera-sensors','fenice-telemetria-sender','can-analyzer','telemetry-tools','api-swe','can-bus-id-generator','Matlab-data-viewer','telemetria-sender-fe','telemetria-sender-server','docker_control','eagletrt-telemetria-exporter','documentation']
+            var repositoryContainsTag = ["volante","telemetria","fenice","chimera"]
+            //var topics = req.body.topics
+            var repositoriesWithTopics = {}
+            try {
+                // var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
+                if (repositories == null || repositories.status != null){
+                    return res.status(500).send('500 - Internal Server Error')     
+                } 
+                // console.log(repositories)
+                repositories.forEach(async function(element) {
+                    //var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,element)
+                    if (repositoryContainsTag == null || repositoryContainsTag.status != null){
+                        return res.status(500).send('500 - Internal Server Error')     
+                    } 
+                    //console.log(repositoryContainsTag) 
+                    //var topics = req.body.topics
+                    var topics = ["volante","telemetria"]
+                    var result = []
+                    for (let index = 0; index < topics.length; index++) {
+                        if(repositoryContainsTag.includes(topics[index])){
+                            result.push(topics[index])
+                        }
+                    }
+                    repositoriesWithTopics[element] = result;
+                });
+                
+                //console.log(repositoriesWithTopics)
+                var response = {};
+                for (const key in repositoriesWithTopics) {
+                    for (const element of repositoriesWithTopics[key]) {
+                        response[element] = response[element] ? [...response[element], key] : [key];
                     }
                 }
-                repositoriesWithTopics[element] = result;
-            });
-            
-            //console.log(repositoriesWithTopics)
-            var response = {};
-            for (const key in repositoriesWithTopics) {
-                for (const element of repositoriesWithTopics[key]) {
-                    response[element] = response[element] ? [...response[element], key] : [key];
-                }
+                //console.log(response)            
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')         
             }
-            //console.log(response)            
-            res.status(200).send(response)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        }else{
+            return res.status(400).send('400 - Bad Request')
         }
     },
     getRepositoriesIssues: async function(req, res) {
-        var config = {
-            method: 'get',
-            url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
-            headers: { 
-               Accept: 'application/vnd.github.v3+json',
-                Authorization: `Bearer ${req.body.githubToken}`
+        if (req.body.githubToken != null && req.params.repository != null) {       
+            var config = {
+                method: 'get',
+                url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
+                headers: { 
+                    Accept: 'application/vnd.github.v3+json',
+                    Authorization: `Bearer ${req.body.githubToken}`
+                }
+            };
+            var response = []
+            try {
+                const issues = (await axios(config)).data
+                for (let index = 0; index < issues.length; index++) {
+                    response.push({"number" : issues[index].number, "title" : issues[index].title, "description" : issues[index].body})
+                }
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')                    
             }
-        };
-        var response = []
-        try {
-            const issues = (await axios(config)).data
-            for (let index = 0; index < issues.length; index++) {
-                response.push({"title" : issues[index].title, "description" : issues[index].body})
-            }
-            res.status(200).send(response)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+        }else{
+            return res.status(400).send('400 - Bad Request')
         }
     },
     createGitHubIssue: async function(req, res) {
-
-        var data = JSON.stringify({"title": req.body.title,"body": req.body.description,"labels":req.body.labels});
-        var config = {
-            method: 'post',
-            url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
-            headers: { 
-                Accept: 'application/vnd.github.v3+json',
-                Authorization: `Bearer ${req.body.githubToken}`
-            },
-        data : data
-        };
-        
-        try {
-            const response = await axios(config)
-            res.status(200).send(response.data)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
-        }
-    },
-    assignGitHubIssue: async function(req, res) {
-        try {
-            var data = JSON.stringify({
-                    "assignees": [req.body.username] 
-                });
+        if (req.body.githubToken != null && req.params.repository != null && req.body.title != null) {       
+            var data = JSON.stringify({"title": req.body.title,"body": req.body.description,"labels":req.body.labels});
             var config = {
                 method: 'post',
-                url: 'https://api.github.com/repos/eagletrt/' + req.params.repository + '/issues/' + req.params.issueID + '/assignees',
+                url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/issues',
                 headers: { 
                     Accept: 'application/vnd.github.v3+json',
                     Authorization: `Bearer ${req.body.githubToken}`
                 },
             data : data
             };
-            const response = await axios(config)
-            res.status(200).send(response.data)
-        } catch (error) {
-            res.status(500).send(error)
-            console.log(error);            
+            
+            try {
+                const issue = await axios(config)
+                var response = {
+                    number: issue.data.number,                    
+                    title: issue.data.title,                    
+                    url: issue.data.url                    
+                }
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')                    
+            }
+        }else{
+            return res.status(400).send('400 - Bad Request')
+        }
+    },
+    assignGitHubIssue: async function(req, res) {
+        if (req.body.githubToken != null && req.params.repository != null && req.params.issueID != null && req.body.username != null) {       
+            try {
+                var data = JSON.stringify({
+                        "assignees": [req.body.username] 
+                    });
+                var config = {
+                    method: 'post',
+                    url: 'https://api.github.com/repos/eagletrt/' + req.params.repository + '/issues/' + req.params.issueID + '/assignees',
+                    headers: { 
+                        Accept: 'application/vnd.github.v3+json',
+                        Authorization: `Bearer ${req.body.githubToken}`
+                    },
+                data : data
+                };
+                const issue = await axios(config)
+                var response = {
+                    number: issue.data.number,                    
+                    title: issue.data.title,                    
+                    url: issue.data.url                    
+                }
+                res.status(200).send(response)
+            } catch (error) {
+                res.status(500).send('500 - Internal Server Error')                   
+            }
+        }else{
+            return res.status(400).send('400 - Bad Request')
         }
     }
 
