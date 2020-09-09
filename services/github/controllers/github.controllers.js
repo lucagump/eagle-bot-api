@@ -123,10 +123,12 @@ module.exports = {
             try {
                 const response = await getInviteCollaboration(req)
                 if(response.status == 204){
-                    return res.status(204).send("User is already a Collaborator")
+                    console.log(response.statusText)
+                    return res.status(204).send(response.statusText)
                 }        
                 res.status(response.status).send(response.statusText+" - User has been invited")
             } catch (error) {
+                console.log(error)
                 res.status(500).send('500 - Internal Server Error')
             }
         }else{

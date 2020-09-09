@@ -84,9 +84,14 @@ async function inviteToOrganization(email){
     return errorMessage
   }
 }
-async function inviteToCollaborate(repository,username){
+async function inviteToCollaborate(msg,repository,username){
   try {
-    const response = await axios.put(app_domain + '/actions/repositories/'+repository+'/collaborators/'+username);
+    const response = await axios.put(app_domain + '/actions/repositories/'+repository+'/collaborators/'+username,{
+      userID: msg.from.id
+    });
+    if(response.status == 204){
+      return "204"
+    }
     return response.data
   } catch (error) {
     return error.message
@@ -303,16 +308,17 @@ telegrambot.command('collaboration', async function (ctx) {
   var repository = null;
   
   var inputData = ctx.update.message.text.split(" ")
-  console.log(inputData.length)
   
   if (inputData.length > 2 ) {
     username = inputData[1];
     repository = inputData[2];
   
     try {
-      const message = await inviteToCollaborate(repository,username)
-      ctx.reply(message) 
-      //ctx.reply(username + " has been invited to collaborate in "+repository) 
+      const message = await inviteToCollaborate(ctx,repository,username)
+      if(message == "204") {
+        return ctx.reply("User is already a collaborator")
+      }
+      return ctx.reply(username + " has been invited to collaborate in "+repository) 
     } catch (error) {
       await ctx.reply(username + " " + message + " " + "Error to Handle")
       console.log(error);
@@ -634,6 +640,9 @@ telegrambot.command('getissues', async function (ctx) {
     
     try {
       const response = await getIssues(ctx,repository)
+      if( response == '404 - Repository not Found'){
+        return ctx.reply("Can't finde the <b>repository</b> \n\n"+text,Extra.HTML()) 
+      }
       var text = '';
       
       response.forEach(element => {

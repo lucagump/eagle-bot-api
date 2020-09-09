@@ -224,6 +224,9 @@ module.exports = {
                 const response = await databasePostUser(req,member.groups)
                 if(response.name == "Error"){
                     return res.status(500).send(response.message)
+                }
+                if(response == "202 - User is already in database"){
+                    return res.status(202).send(response)
                 }        
                 res.status(201).send(response);
             } catch (error) {
@@ -400,7 +403,6 @@ module.exports = {
 
                 await res.status(200).send(member);
             } catch (error) {
-                console.log(error);
                 res.status(500).send('500 - Internal Server Error')
             }
         }else{
@@ -418,11 +420,10 @@ module.exports = {
                 }
                 const response = await sendCollaborationInvite(user.githubToken,req)
                 if(response.status == 204){
-                    return res.status(204).send('204 - User is already a Collaborator')
+                    return res.status(204).send("204 - User is already a Collaborator")
                 }
                 res.status(200).send(response.data)
             } catch (error) {
-                console.log(error);
                 res.status(500).send('500 - Internal Server Error')
             }
         }else{
