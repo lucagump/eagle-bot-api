@@ -12,7 +12,6 @@ RUN npm install
 EXPOSE 80
 
 CMD ["nodemon", "-r", "dotenv/config", "server.js", "dotenv_config_path=./"]
-# CMD ["node", "/src/index.js"]
 
 
 

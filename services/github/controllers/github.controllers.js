@@ -1,9 +1,5 @@
 const axios = require('axios')
 
-const config = require('../../../config/config.json');
-const { response } = require('express');
-require('../models/github.models.js');						
-
 // Documentation
 // https://docs.github.com/en/rest/
 

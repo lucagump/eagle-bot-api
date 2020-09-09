@@ -3,20 +3,20 @@ services:
     telegram:
       build: ./services/telegram
       ports:
-      - "5000:80"
+      - "8000:80"
     
     github:
         build: ./services/github
         ports:
-        - "5001:80"
+        - "8001:80"
 
     airtable:
         build: ./services/airtable
         ports:
-        - "5002:80"
+        - "8002:80"
 
     database:
         build: ./services/database
         ports:
-        - "5003:80"
+        - "8003:80"
     

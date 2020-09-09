@@ -1,6 +1,4 @@
 const axios = require('axios')
-const errors = require('../common/errors');
-
 
 async function databasePostUser(req,groups){
     try {

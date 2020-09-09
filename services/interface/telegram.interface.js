@@ -260,7 +260,7 @@ async function getRepositoriesGroups(msg){
 
 // Alias in Menu to go back 
 telegrambot.hears('🏎🏁E-Agle Bot🏁🏎', async ctx => {
-  ctx.reply(MESSAGES.GITHUB_TOKEN_NOT_SPECIFIED, Markup
+  ctx.reply("Select an Action to start", Markup
     .keyboard([
       ['🚀 Tasks and Issues 🚀'], 
       ['👤 New Member',  'Add Collab 👨‍💻','Join Org🤝'],
@@ -318,7 +318,8 @@ telegrambot.command('collaboration', async function (ctx) {
       console.log(error);
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("Send the command in this format:\n\n"+
+    "/collaboration username repository");
   }
 });
 telegrambot.hears('Join Org🤝', async function (ctx) {
@@ -332,13 +333,9 @@ telegrambot.command('organization', async function (ctx) {
   var inputData = ctx.update.message.text.split(" ")
   console.log(inputData.length)
   
-  if (inputData.length > 3 ) {
-    username = inputData[1];
-    repository = inputData[2];
+  if (inputData.length > 1 ) {
+    email = inputData[1];
   
-    if (!email) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
-    //Check se l'utente è già stato inserito nel db, altrimenti update
     try {
       const message = await inviteToOrganization(email)
       return await ctx.reply(email + "has been invited to join organization") 
@@ -347,7 +344,8 @@ telegrambot.command('organization', async function (ctx) {
       return await ctx.reply(email + " " + message + " " + "Error to Handle")
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("Send the command in this format: \n\n"+
+    "/organization email");
   }
 });
 
@@ -406,11 +404,7 @@ telegrambot.command('problem', async function (ctx) {
     repository = inputData[3];
     group = inputData[4];
 
-    if (!title) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!description) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!group) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
+ 
     try {
       const message = await createIssueTask(ctx,title,description,repository,group)
       return await ctx.reply("Issue is in "+ repository + " and in Airtable") 
@@ -435,10 +429,6 @@ telegrambot.command('newissue', async function (ctx) {
     description = inputData[2];
     repository = inputData[3];
 
-    if (!title) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!description) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
     try {
       const message = await createIssue(ctx,title,description,repository)
       return await ctx.reply("Issue is in "+ repository) 
@@ -461,10 +451,6 @@ telegrambot.command('newtask', async function (ctx) {
     title = inputData[1]; 
     description = inputData[2];
     group = inputData[3];
-
-    if (!title) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!description) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!group) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
     
     try {
       const message = await createTask(ctx,title,description,group)
@@ -503,7 +489,7 @@ telegrambot.command('assigntask', async function (ctx) {
       return ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("To assign a task just send the command as describe in the example below: \n\n /assigntask taskID githubUsername")
   }
 });
 telegrambot.command('assignissue', async function (ctx) {
@@ -531,7 +517,7 @@ telegrambot.command('assignissue', async function (ctx) {
       return await ctx.reply("Issue: " + issueID + " cannot be assigned",Extra.HTML())
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("To assign an issue just send the command as describe in the example below: \n\n /assignissue repository issueID githubUsername")
   }
 });
 telegrambot.hears('New Issue 😎', async ctx => {
@@ -539,7 +525,7 @@ telegrambot.hears('New Issue 😎', async ctx => {
   'you can do both using /problem \n\n'+
   '/newissue / title / description / repository \n' +
   '/newtask / title / description / group \n' +
-  '/problem / title / description / repository /group \n\n' +
+  '/problem / title / description / repository / group \n\n' +
   '<i>Problems with Repositories and Groups? use /repositories and /groups 😊</i>',Extra.HTML())
 });
 //OK
@@ -660,7 +646,7 @@ telegrambot.command('getissues', async function (ctx) {
       console.log(error);
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("To get the issues just send the command as describe in the example below: \n\n /getissues repository")
   }
 });
 
@@ -713,7 +699,9 @@ telegrambot.command('authentication', async function (ctx) {
       console.log(error);
     } 
   } else {
-    ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+    ctx.reply("Send the command in this format:"+
+    "/authentication airtableToken airtableBase githubToken usernameGitHub group1 group2"
+  );
   }
 });
 telegrambot.hears('Logout😴', async function (ctx) {
