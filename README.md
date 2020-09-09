@@ -1,5 +1,9 @@
 # eagle-bot-api
 
+## Project Structure
+
+![Schema](public/schema.png)
+
 ## Install
 ```javascript
 git clone https://github.com/lucagump/eagle-cms.git
@@ -8,7 +12,7 @@ npm install
 
 ## Config
 
-After the repository is cloned and modules installed, just place you .env file with tokens and variable you are going to use. 
+Clone the repository, install the module and  place the .env file with tokens and variables. 
 
 ## Run
 
