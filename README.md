@@ -1,6 +1,6 @@
 # eagle-bot-api
 
-The project is up and running (_I hope_) ![here] (https://eagle-bot-api.herokuapp.com/)
+Telegram Bot developed for E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable. The project is up and running (_hoping_) ![here] (https://eagle-bot-api.herokuapp.com/)
 
 ## Project Structure
 
@@ -14,7 +14,7 @@ npm install
 
 ## Config
 
-Clone the repository, install the module and  place the .env file with tokens and variables. 
+Clone the repository, install the module and place the .env file with tokens and variables. 
 
 ## Run
 
