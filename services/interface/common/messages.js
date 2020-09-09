@@ -10,21 +10,20 @@ module.exports = {
     HELP: `Hi, I\'m here to show you something interesting about eagletrt profile. Although, you need to tell me your username and personal token for me to do that. Call me via \n\n /authentication airtableToken airtableBase githubToken usernameGitHub`,
 };
 
-commands = {
-    eaglebot - call the menu bot
-    authentication - authenticate to the server with your tokens
-    members - get members list
-    assignIssue - assign a repository issue to a member 
-    assignTask - assign task to a member
-    organization - invite to join organization
-    collaboration - invite to join a project
-    form - Airtable form
-    problem - create a new issue and task
-    newissue - create a new issue
-    newtask - create a new task
-    groups - get groups
-    repositories - get repositories
-    grouprepositories - get repositories divided in group
-    getissues - get the issues of a repository
+    
+// eaglebot - Call the bot menu
+// authentication - Authenticate to the server with your tokens
+// members - Get members list
+// assignissue - Assign a repository issue to a member 
+// assigntask - Assign task to a member
+// organization - Invite to join organization
+// collaboration - Invite to join a project
+// form - Airtable form
+// problem - Create a new issue and task
+// newissue - Create a new issue
+// newtask - Create a new task
+// groups - Get groups
+// repositories - Get repositories
+// grouprepositories - Get repositories divided in group
+// getissues - Get the issues of a repository
 
-}

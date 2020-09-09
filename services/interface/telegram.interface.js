@@ -55,10 +55,10 @@ async function authentication(msg,airtableToken,airtableBase,githubToken,usernam
 async function logout(msg){
   try {
     const response = await axios.delete(app_domain + '/actions/users/' + msg.from.id);
-    return response
+    return response.data
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
-    //console.log(error)
+    console.log(error)
     return error
   }
 }
@@ -72,10 +72,11 @@ async function getAirtableLink(){
     return errorMessage
   }
 }
-async function inviteToOrganization(email){
+async function inviteToOrganization(msg,email){
   try {
     const response = await axios.post(app_domain + '/actions/users/githubInvitation',{
-      'email': email,
+      'userID': msg.from.id,
+      'email': email
   });
     return response.data
   } catch (error) {
@@ -130,9 +131,7 @@ async function getGroups(msg){
     const response = await axios.get(app_domain + '/actions/users/'+msg.from.id);
     return response.data
   } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
+    return error
   }
 } 
 async function getGroupTasks(msg){
@@ -248,9 +247,7 @@ async function getRepositoriesGroups(msg){
     const response = await axios.get(app_domain + '/actions/topics/repositories/'+ msg.from.id);
     return response.data
   } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
+    return error
   }
 }
 
@@ -344,7 +341,7 @@ telegrambot.command('organization', async function (ctx) {
     email = inputData[1];
   
     try {
-      const message = await inviteToOrganization(email)
+      const message = await inviteToOrganization(ctx,email)
       return await ctx.reply(email + "has been invited to join organization") 
     } catch (error) {
       console.log(error);
@@ -494,7 +491,9 @@ telegrambot.command('assigntask', async function (ctx) {
 
     try {
       const message = await assignTask(ctx,taskID,username)
-      console.log(message)
+      if ( message == "Something bad just happened! Check your Server") {
+        return ctx.reply(message.data) 
+      }
       return ctx.reply(message.data) 
     } catch (error) {
       console.log(error);
@@ -596,7 +595,10 @@ telegrambot.command('repositories', async function (ctx) {
 });
 telegrambot.command('grouprepositories', async function (ctx) {
   try {
-    const response = await getRepositoriesGroups(ctx)    
+    const response = await getRepositoriesGroups(ctx)
+    if (response.response.status == "404") {
+      return ctx.reply(MESSAGES.UNAUTHORIZED) 
+    }     
     var text = '';
     for(var k in response) {
       text += "\n" +  k + '\n\n'; 
@@ -611,15 +613,19 @@ telegrambot.command('grouprepositories', async function (ctx) {
   }
 });
 telegrambot.action(/.+/, async (ctx) => {
-  if(ctx.match[0] == "yes" || ctx.match[0] == "no"){
+  if(ctx.match[0] == "yes"){
     try {
       const message = await logout(ctx)
-      console.log(message)
-      await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
+      if ( message.response.status == "404") {
+        return ctx.reply("Your account is already unlinked") 
+      } 
+      return ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
     } catch (error) {
       ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       console.log(error);
     }
+  } if (ctx.match[0] == "no") {
+    return ctx.reply('It\'s fine <i>I\'m here</i> for you 😊',Extra.HTML())
   } else {
     try {
       const response = await getGroupTasks(ctx)
@@ -640,6 +646,10 @@ telegrambot.hears('🔍 Get Tasks', async (ctx) => {
 
   try {
     const response = await getGroups(ctx)
+    console.log(response)
+    if (response.response.status == "404") {
+      return ctx.reply(MESSAGES.UNAUTHORIZED) 
+    } 
     return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>
     m.inlineKeyboard([
       m.callbackButton(response.groups[0], response.groups[0]),
@@ -741,7 +751,7 @@ telegrambot.command('authentication', async function (ctx) {
 telegrambot.hears('Logout😴', async function (ctx) {
   await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
 
-  return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>
+  return ctx.reply('Are you sure?', Extra.HTML().markup((m) =>
   m.inlineKeyboard([
     m.callbackButton(" Yes ", "yes"),
     m.callbackButton(" No ", "no"),
@@ -749,21 +759,18 @@ telegrambot.hears('Logout😴', async function (ctx) {
 
 });
 telegrambot.hears('Test🤘', function (ctx) {
-  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-
+  ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   ctx.reply( 
     "Hello "+ ctx.from.username + "\n"+
     "our Chat ID is: " + ctx.chat.id + 
     "\nyour Telegram ID is: " + ctx.from.id);
 });
-telegrambot.hears('Uptime🏁', async function (ctx) {
-  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-
+telegrambot.hears('Uptime🏁', function (ctx) {
+  ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   ctx.reply("Uptime: "+ startTime.from(moment(), true));
 });
-telegrambot.hears('Help👨‍💻', async function (ctx) {
-  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
-
+telegrambot.hears('Help👨‍💻', function (ctx) {
+  ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   ctx.reply(MESSAGES.HELP);
 });
 
