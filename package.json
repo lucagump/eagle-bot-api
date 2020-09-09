@@ -1,7 +1,7 @@
 {
   "name": "eagle-cms",
   "version": "1.0.0",
-  "description": "CMS used by E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable",
+  "description": "Telegram Bot developed for E-Agle Trento Racing Team to manage tasks and issues on GitHub/AirTable",
   "main": "server.js",
   "dependencies": {
     "airtable": "^0.9.0",
@@ -31,12 +31,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucagump/eagle-cms.git"
+    "url": "git+https://github.com/lucagump/eagle-bot-api.git"
   },
   "author": "Luca Martinelli",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lucagump/eagle-cms/issues"
+    "url": "https://github.com/lucagump/eagle-bot-api/issues"
   },
-  "homepage": "https://github.com/lucagump/eagle-cms#readme"
+  "homepage": "https://github.com/lucagump/eagle-bot-api#readme"
 }
