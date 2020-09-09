@@ -1,5 +1,7 @@
 # eagle-bot-api
 
+The project is up and running (_I hope_) [here] (https://eagle-bot-api.herokuapp.com/)
+
 ## Project Structure
 
 ![Schema](public/schema.png)
