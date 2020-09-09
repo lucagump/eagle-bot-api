@@ -265,6 +265,7 @@ async function getRepositoriesGroups(msg){
 
 // Alias in Menu to go back 
 telegrambot.hears('🏎🏁E-Agle Bot🏁🏎', async ctx => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   ctx.reply("Select an Action to start", Markup
     .keyboard([
       ['🚀 Tasks and Issues 🚀'], 
@@ -357,6 +358,7 @@ telegrambot.command('organization', async function (ctx) {
 
 // TASK AND ISSUES
 telegrambot.hears('🚀 Tasks and Issues 🚀', async ctx => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   try {
     await ctx.reply("Select an Action to start",Markup
       .keyboard([
@@ -377,6 +379,8 @@ telegrambot.hears('🚀 Tasks and Issues 🚀', async ctx => {
 });
 // TASK AND ISSUES - ASSIGN TASK / ASSIGN ISSUE
 telegrambot.hears('⭐️ Assign 📢', async ctx => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   try {
     await ctx.reply("Select an Action to start",Markup
       .keyboard([
@@ -470,9 +474,11 @@ telegrambot.command('newtask', async function (ctx) {
   }
 });
 telegrambot.hears('⭐️ Assign Task', async function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   return ctx.reply("To assign a task just send the command as describe in the example below: \n\n /assigntask taskID githubUsername")
 });
 telegrambot.hears('Assign Issue 😎', async function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   return ctx.reply("To assign an issue just send the command as describe in the example below: \n\n /assignissue repository issueID githubUsername")
 });
 telegrambot.command('assigntask', async function (ctx) {
@@ -511,12 +517,11 @@ telegrambot.command('assignissue', async function (ctx) {
     issueID = inputData[2]; 
     username = inputData[3];
 
-    if (!repository) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!issueID) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    if (!username) return ctx.reply(MESSAGES.AIRTABLE_TOKEN_NOT_SPECIFIED);
-    
     try {
       const message = await assignIssue(ctx,repository,issueID,username)
+      if( message.title == null){
+        return ctx.reply("Issue: " + issueID + " cannot be assigned",Extra.HTML())
+      }
       return await ctx.reply("Issue assign to "+ username) 
     } catch (error) {
       console.log(error);
@@ -527,6 +532,8 @@ telegrambot.command('assignissue', async function (ctx) {
   }
 });
 telegrambot.hears('New Issue 😎', async ctx => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   ctx.reply('Here we are! You can create a new issue or a new task as showed below, '+
   'you can do both using /problem \n\n'+
   '/newissue / title / description / repository \n' +
@@ -562,6 +569,9 @@ telegrambot.command('members', async (ctx) => {
       await ctx.reply("Here the Members list \n\n"+text,Extra.HTML()) 
     } else {
       response = await getMember(ctx,username)
+      if (response == null){
+        return ctx.reply(username + " is not a member, sorry")
+      }
       text += '' + response.name + ' tasks: ' + response.tasks.length +' \n';
       await ctx.reply("Here " + username+ "! \n\n" + text,Extra.HTML()) 
     }
@@ -601,20 +611,33 @@ telegrambot.command('grouprepositories', async function (ctx) {
   }
 });
 telegrambot.action(/.+/, async (ctx) => {
-  try {
-    const response = await getGroupTasks(ctx)
-    var text = '';
-    for (var i = 0; i < response.length; i++) {
-        text += response[i].task + ' \n';
+  if(ctx.match[0] == "yes" || ctx.match[0] == "no"){
+    try {
+      const message = await logout(ctx)
+      console.log(message)
+      await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
+    } catch (error) {
+      ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+      console.log(error);
     }
-    ctx.answerCbQuery(`Check the Tasks in ${ctx.match[0]}!`)
-    await ctx.reply("Here a list of yours <b>tasks</b> \n\n"+text,Extra.HTML()) 
-  } catch (error) {
-    ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
-    console.log(error);
+  } else {
+    try {
+      const response = await getGroupTasks(ctx)
+      var text = '';
+      for (var i = 0; i < response.length; i++) {
+          text += response[i].task + ' \n';
+      }
+      ctx.answerCbQuery(`Check the Tasks in ${ctx.match[0]}!`)
+      await ctx.reply("Here a list of yours <b>tasks</b> \n\n"+text,Extra.HTML()) 
+    } catch (error) {
+      ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+      console.log(error);
+    }
   }
 });
 telegrambot.hears('🔍 Get Tasks', async (ctx) => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   try {
     const response = await getGroups(ctx)
     return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>
@@ -662,6 +685,8 @@ telegrambot.command('getissues', async function (ctx) {
 
 // BOT SETTINGS 
 telegrambot.hears('🤖 Bot Settings 🤖', async ctx => {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   ctx.reply("Select an Action to start",Markup
     .keyboard([
       ['🏎🏁E-Agle Bot🏁🏎'],
@@ -714,29 +739,31 @@ telegrambot.command('authentication', async function (ctx) {
   }
 });
 telegrambot.hears('Logout😴', async function (ctx) {
-  try {
-    const message = await logout(ctx)
-    console.log(message)
-    // Se non posso rimuovere
-    //if (message.status = "500") ctx.reply(MESSAGES.SOMETHING_WENT_WRONG);
-    // Se non ti trovo
-    //if (message.status = "404") ctx.reply(message.data);
-    await ctx.reply(MESSAGES.ACCOUNT_UNLINKED) 
-  } catch (error) {
-    ctx.reply(MESSAGES.SOMETHING_WENT_WRONG)
-    console.log(error);
-  }
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
+  return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>
+  m.inlineKeyboard([
+    m.callbackButton(" Yes ", "yes"),
+    m.callbackButton(" No ", "no"),
+  ])))
+
 });
 telegrambot.hears('Test🤘', function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   ctx.reply( 
     "Hello "+ ctx.from.username + "\n"+
     "our Chat ID is: " + ctx.chat.id + 
     "\nyour Telegram ID is: " + ctx.from.id);
 });
 telegrambot.hears('Uptime🏁', async function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   ctx.reply("Uptime: "+ startTime.from(moment(), true));
 });
 telegrambot.hears('Help👨‍💻', async function (ctx) {
+  await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+
   ctx.reply(MESSAGES.HELP);
 });
 
