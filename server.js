@@ -4,13 +4,13 @@ var cors = require('cors')
 var util = require('util');
 var fs = require('fs');
 
-var dotenv = require('dotenv');
-const result = dotenv.config()
+// var dotenv = require('dotenv');
+// const result = dotenv.config()
  
-if (result.error) {
-  throw result.error
-}
-console.log(result.parsed)
+// if (result.error) {
+//   throw result.error
+// }
+// console.log(result.parsed)
 
 var bodyParser = require('body-parser');
 var morgan = require('morgan'); // log requests to the console (express4)
