@@ -11,13 +11,15 @@ const actions_controller = require('./controllers/actions.controllers');
 //                               \/    \/     \/     \/ 
 
 
-router.post('/users', actions_controller.addUserToDataBase)
-router.delete('/users/:userID', actions_controller.deleteUserFromDataBase)
+router.post('/authentication', actions_controller.authenticateUser)
+router.delete('/logout/:userID', actions_controller.deleteUserFromDataBase)
 
 router.put('/tasks/:taskID', actions_controller.assignTask)
 
-router.post('/problems', actions_controller.createIssueTask)
+router.post('/problems', actions_controller.createProblem)
 
+// params topics?
+router.get('/repositories/:userID', actions_controller.getGroupsRepositories)
 router.get('/topics/repositories/:userID', actions_controller.getGroupsRepositories)
 
 /*

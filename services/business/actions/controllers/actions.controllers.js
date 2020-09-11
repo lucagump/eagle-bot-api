@@ -230,10 +230,19 @@ module.exports = {
                 }        
                 res.status(201).send(response);
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                console.log(error);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getUserFromDataBase: async function(req, res) {
@@ -243,12 +252,25 @@ module.exports = {
                 if(response.name == "Error"){
                     return res.status(404).send(response.message)
                 }
-                res.status(200).send(response);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                })
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                console.log(error);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     deleteUserFromDataBase: async function(req, res) {
@@ -258,12 +280,25 @@ module.exports = {
                 if(response.name == "Error"){
                     return res.status(404).send(response.message)
                 }
-                res.status(200).json(response)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                })
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                console.log(error);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
 
@@ -281,13 +316,25 @@ module.exports = {
                     return res.status(502).send(airtableTask.message)
                 }
 
-                await res.status(200).send(airtableTask.data);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: airtableTask.data
+                })
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     createGroupTask: async function(req, res) {
@@ -302,13 +349,25 @@ module.exports = {
                     return res.status(500).send(airtableTask.message)
                 }
                 
-                await res.status(200).send(airtableTask.data);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: airtableTask.data
+                })
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     assignTask: async function(req, res) {
@@ -321,10 +380,18 @@ module.exports = {
             if(airtableTask.name == "Error"){
                 return res.status(500).send(airtableTask.message)
             }
-            await res.status(200).send(airtableTask.data);
+            return res.status(200).send({
+                status: 'success',
+                statusCode: 200,
+                data: airtableTask.data
+            })
         } catch (error) {
             console.log(error);
-            res.status(500).send('500 - Internal Server Error')
+            return res.status(500).send({
+                status: 'fail',
+                statusCode: 500,
+                errorMessage: 'Internal Server Error'
+            })
         }
     },
     getGroupTasks: async function(req, res) {
@@ -339,12 +406,25 @@ module.exports = {
                     return res.status(500).send(tasks.message)
                 }
 
-                await res.status(200).send(tasks);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: tasks
+                });
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                console.log(error);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },    
     getTasks: async function(req, res) {
@@ -359,13 +439,25 @@ module.exports = {
                     return res.status(500).send(tasks.message)
                 }
 
-                await res.status(200).send(tasks);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: tasks
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getMembers: async function(req, res) {
@@ -380,13 +472,25 @@ module.exports = {
                     return res.status(500).send(members.message)
                 }
 
-                await res.status(200).send(members);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: members
+                })
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getMember: async function(req, res) {
@@ -401,12 +505,24 @@ module.exports = {
                     return res.status(500).send(member.message)
                 }
 
-                await res.status(200).send(member);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: member
+                });
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     
@@ -422,12 +538,24 @@ module.exports = {
                 if(response.status == 204){
                     return res.status(204).send("204 - User is already a Collaborator")
                 }
-                res.status(200).send(response.data)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response.data
+                });
             } catch (error) {
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     inviteOrganization: async function(req, res) {
@@ -439,13 +567,25 @@ module.exports = {
                 }
                 const response = await sendOrganizationInvite(user.githubToken,req)
                 console.log(response)
-                await res.status(200).send(response);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getRepositories: async function(req, res) {
@@ -456,13 +596,25 @@ module.exports = {
                     return res.status(401).send("401 - User not Authorized")
                 }
                 const repositories = await githubRepositories(user.githubToken)
-                await res.status(200).send(repositories);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: repositories
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     createIssue: async function(req, res) {
@@ -479,10 +631,18 @@ module.exports = {
                 await res.status(201).send(response);
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     assignIssue: async function(req, res) {
@@ -494,13 +654,25 @@ module.exports = {
                     return res.status(401).send("401 - User not Authorized")
                 }
                 const githubIssue = await assignIssue(req,user.githubToken)
-                await res.status(200).send(githubIssue);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: githubIssue
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getIssues: async function(req, res) {
@@ -514,13 +686,25 @@ module.exports = {
                 if(issues.name == "Error"){
                     return res.status(404).send("404 - Repository not Found")
                 }
-                await res.status(200).send(issues);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: issues
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                                        return res.status(500).send({
+                            status: 'fail',
+                            statusCode: 500,
+                            errorMessage: 'Internal Server Error'
+                          })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
 
@@ -545,13 +729,25 @@ module.exports = {
                     "githubIssue": githubIssue.url,
                     "airtableTask": airtableTask.data.id
                 }
-                await res.status(200).send(response);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Internal Server Error'
+                })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getGroupsRepositories: async function(req, res) {
@@ -562,13 +758,25 @@ module.exports = {
                     return res.status(401).send("401 - User not Authorized")
                 }
                 const repositories = await githubRepositoriesByGroup(user.githubToken,user.groups)
-                await res.status(200).send(repositories);
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: repositories
+                });
             } catch (error) {
                 console.log(error);
-                res.status(500).send('500 - Internal Server Error')
+                                        return res.status(500).send({
+                            status: 'fail',
+                            statusCode: 500,
+                            errorMessage: 'Internal Server Error'
+                          })
             }
         }else{
-            return res.status(400).send('400 - Bad Request')
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     }
 }

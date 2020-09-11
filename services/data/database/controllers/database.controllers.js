@@ -35,52 +35,33 @@ module.exports = {
 
     addUser: function(req, res) {
         if (req.body.userID != null && req.body.airtableToken != null && req.body.githubToken != null  && req.body.usernameGitHub != null && req.body.groups != null) {   
-            User.findOne({ userID: req.body.userID },
-                function(err, doc) {
-                    if (err){
-                        console.log('\x1b[33mThere was an error while looking up the '+ document + '\x1b[0m\n')
-                        return res.status(500).send({
-                            status: 'fail',
-                            statusCode: 500,
-                            errorMessage: 'User couldn\'t be saved, please try again later'
-                          })
-                    }
-                    if(doc != null){
-                        return res.status(202).send({
-                            status: 'fail',
-                            statusCode: 202,
-                            errorMessage: 'User is already in the database'
-                          })
-                    } else {
-                        let user = new User({
-                            userID: req.body.userID,
-                            chatID: req.body.chatID,
-                            usernameTelegram: req.body.usernameTelegram,
-                            usernameGitHub: req.body.usernameGitHub,
-                            groups: req.body.groups,
-                            githubToken: req.body.githubToken,
-                            airtableToken: req.body.airtableToken,
-                            airtableBase: req.body.airtableBase
-                        });
             
-                        user.save(function(err,doc) {
-                            if (err) {
-                                console.log(err)
-                                return res.status(500).send({
-                                    status: 'fail',
-                                    statusCode: 500,
-                                    errorMessage: 'User couldn\'t be saved, please try again later'
-                                  })
-                            } 
-                            return res.status(201).send({
-                                status: 'success',
-                                statusCode: 201,
-                                data: user
-                            })
+            let user = new User({
+                userID: req.body.userID,
+                chatID: req.body.chatID,
+                usernameTelegram: req.body.usernameTelegram,
+                usernameGitHub: req.body.usernameGitHub,
+                groups: req.body.groups,
+                githubToken: req.body.githubToken,
+                airtableToken: req.body.airtableToken,
+                airtableBase: req.body.airtableBase
+            });
+
+            user.save(function(err,doc) {
+                if (err) {
+                    console.log(err)
+                    return res.status(500).send({
+                        status: 'fail',
+                        statusCode: 500,
+                        errorMessage: 'User couldn\'t be saved, please try again later'
                         })
-                    }
-                }
-            )
+                } 
+                return res.status(201).send({
+                    status: 'success',
+                    statusCode: 201,
+                    data: user
+                })
+            })
         } else {
             return res.status(400).send({
                 status: 'fail',
