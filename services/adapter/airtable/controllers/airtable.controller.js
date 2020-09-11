@@ -1,7 +1,5 @@
 var Airtable = require('airtable');
 
-const config = require('../../../config/config.json');
-
 module.exports = {
  
     getMembersForm: function (req,res){
@@ -18,38 +16,58 @@ module.exports = {
                     .firstPage();
                     
                     if(record[0] == null){
-                        return res.status(404).send("404 - Memeber not Found")
+                        return res.status(404).send({
+                            status: 'fail',
+                            statusCode: 404,
+                            errorMessage: 'Member couldn\'t be found, please try again later'
+                        })
                     }
                     
-                    var response = {
+                    var data = {
                         id: record[0].id,
                         name: record[0].fields.Collaborator.name,
                         tasks: record[0].fields.Tasks,
                         groups: record[0].fields.Group,
                     }
-                res.status(200).send(response)
+                    return res.status(200).send({
+                        status: 'success',
+                        statusCode: 200,
+                        data: data
+                    })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Member couldn\'t be deleted'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getMembers: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            var response = []
+            var data = []
             try {
                 const records = await base('Members')
                     .select()
                     .firstPage();
                 
                 if(records == null){
-                    return res.status(404).send("404 - Members not Found")
+                    return res.status(404).send({
+                        status: 'fail',
+                        statusCode: 404,
+                        errorMessage: 'Members couldn\'t be found, please try again later'
+                    })
                 }
                 
                 records.forEach(element => {
-                    response.push({
+                    data.push({
                         id: element.id, 
                         name: element.fields.Collaborator.name,
                         groups: element.fields.Group,
@@ -57,18 +75,30 @@ module.exports = {
                     }) 
                 });
 
-                res.status(200).send(response)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Members couldn\'t be found'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getGroupsMembers: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            var response = []
+            var data = []
             try {
                 const records = await base('Members')
                     .select()
@@ -76,7 +106,7 @@ module.exports = {
 
                 records.forEach(element => {
                     if(element.fields.Group.includes(req.params.group)){
-                        response.push({
+                        data.push({
                             id: element.id, 
                             name: element.fields.Collaborator.name,
                             groups: element.fields.Group,
@@ -85,12 +115,24 @@ module.exports = {
                     }
                 });
 
-                res.status(200).send(response)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Groups Members couldn\'t be found'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     
@@ -102,32 +144,57 @@ module.exports = {
                 const task = await base('Tasks').find(req.params.taskID)
 
                 task.fields.id = task.id
-                res.status(200).send(task.fields)
+                data = task.fields
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Task couldn\'t be found'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getTasks: async function(req, res) {
         if (req.body.airtableToken != null && req.body.airtableBase != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
-            var response = []
+            var data = []
             
             try {
                 const records = await base('Tasks').select().firstPage();
 
                 records.forEach(element => {
-                    response.push(element.fields.Task) 
+                    data.push(element.fields.Task) 
                 });
 
-                res.status(200).send(response)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Tasks couldn\'t be found'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     getGroupTasks: async function(req,res){
@@ -136,11 +203,11 @@ module.exports = {
             try {
                 var records = await base('Tasks').select().firstPage();
                    
-                var response = []
+                var data = []
                 records.forEach(element => {
                     if(element.fields.Group != null) {
                         if(element.fields.Group.includes(req.params.group)){
-                            response.push({
+                            data.push({
                                 id: element.id,
                                 task: element.fields.Task, 
                                 description: element.fields.Description
@@ -149,13 +216,24 @@ module.exports = {
                     }
                 });
 
-                res.status(201).send(response)
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: data
+                })
             } catch (err) {
-                console.log(err)
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Group tasks couldn\'t be found'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request: " + req.body.airtableBase+" and "+req.body.airtableToken)
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
 
@@ -193,12 +271,27 @@ module.exports = {
                         "AssignTo": [minTask.id]
                     });
                 newTask.fields.id = newTask.id
-                res.status(201).send(newTask.fields)
+
+                data = newTask.fields
+                
+                return res.status(201).send({
+                    status: 'success',
+                    statusCode: 201,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Task couldn\'t be created'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     createAirTableTaskGroup: async function(req, res) {
@@ -240,12 +333,26 @@ module.exports = {
                         "AssignTo": [minTask.id]
                     });
                     newTask.fields.id = newTask.id
-                res.status(201).send(newTask.fields)
+                    data = newTask.fields
+
+                    return res.status(201).send({
+                        status: 'success',
+                        statusCode: 201,
+                        data: data
+                    })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Task couldn\'t be created'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     },
     
@@ -276,13 +383,27 @@ module.exports = {
                     "AssignTo": task.fields.AssignTo
                 });
                 taskUpdated.fields.id = taskUpdated.id
+                data = taskUpdated.fields
 
-                res.status(201).send(taskUpdated.fields)
+                return res.status(201).send({
+                    status: 'success',
+                    statusCode: 201,
+                    data: data
+                })
             } catch (err) {
-                return res.status(err.statusCode).send(err);
+                console.log(err)
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Task couldn\'t be assigned'
+                })
             }
         } else {
-            res.status(400).send("400 - Bad Request")
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
         }
     }
 }

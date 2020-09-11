@@ -3,14 +3,24 @@ router = express.Router();
 
 const airtable_controller = require('./controllers/airtable.controller');
 
+//    _____       .___              __                
+//   /  _  \    __| _/____  _______/  |_  ___________ 
+//  /  /_\  \  / __ |\__  \ \____ \   __\/ __ \_  __ \
+// /    |    \/ /_/ | / __ \|  |_> >  | \  ___/|  | \/
+// \____|__  /\____ |(____  /   __/|__|  \___  >__|   
+//         \/      \/     \/|__|             \/       
+
 /*
-	GET		/user
-			/user/BTC
-			/user/ETH
-			/user/USD
-	POST 	/user
-	PUT 	/user/balance
-	DELETE	/plannedaction/:id
+	GET		/form
+			/members/BTC
+			/members/:username
+			/groups/:group
+			/tasks
+			/tasks/:taskID
+			/tasks/groups/:group
+	POST 	/tasks
+	POST 	/tasks/:group
+	PUT 	/tasks/:taskID
 */
 
 router.get('/form', airtable_controller.getMembersForm)

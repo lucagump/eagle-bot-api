@@ -3,15 +3,13 @@ router = express.Router();
 
 const actions_controller = require('./controllers/actions.controllers');
 
-/*
-	GET		/user
-			/user/BTC
-			/user/ETH
-			/user/USD
-	POST 	/user
-	PUT 	/user/balance
-	DELETE	/plannedaction/:id
-*/
+// __________             .__                             
+// \______   \__ __  _____|__| ____   ____   ______ ______
+//  |    |  _/  |  \/  ___/  |/    \_/ __ \ /  ___//  ___/
+//  |    |   \  |  /\___ \|  |   |  \  ___/ \___ \ \___ \ 
+//  |______  /____//____  >__|___|  /\___  >____  >____  >
+//         \/           \/        \/     \/     \/     \/ 
+
 
 router.post('/users', actions_controller.addUserToDataBase)
 router.get('/users/:userID', actions_controller.getUserFromDataBase)

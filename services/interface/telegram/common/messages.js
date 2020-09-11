@@ -1,5 +1,3 @@
-const { assignTask } = require("../../actions/controllers/actions.controllers");
-
 module.exports = {
     START: `Hey! I\'m here to help you manage your repositories issues and airtable tasks. Type /help to get started.`,
     SOMETHING_WENT_WRONG: `Something went wrong and I do not know how to handle this...`,
