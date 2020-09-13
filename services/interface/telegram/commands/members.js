@@ -2,26 +2,11 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function getMembers(msg){
+async function getMember(ctx,username){
   try {
-    const response = await axios.get(app_domain + '/actions/groups/members',{
+    const response = await axios.get(app_domain + '/business/groups/members/'+username,{
       data:{
-        userID: msg.from.id
-      }
-    });
-    return response.data
-  } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
-  }
-}
-
-async function getMember(msg,username){
-  try {
-    const response = await axios.get(app_domain + '/actions/groups/members/'+username,{
-      data:{
-        userID: msg.from.id
+        userID: ctx.from.id
       }
     });
     return response.data
@@ -44,18 +29,37 @@ module.exports = telegrambot => {
     }
     try {
       if (username == null){
-        response = await getMembers(ctx)
+
+        const response = (await axios.get(app_domain + '/business/groups/members',{
+          data:{
+            userID: ctx.from.id
+          }
+        })).data;
+        
+        if(response.status == "fail"){
+          return ctx.reply("I can't find the members, sorry :(",Extra.HTML())
+        }
+        
         for (var i = 0; i < response.length; i++) {
             text += response[i].name + ' - tasks: ' + response[i].tasks.length +' \n';
         }
-        await ctx.reply("Here the Members list \n\n"+text,Extra.HTML()) 
+        
+        return ctx.reply("Here the Members list \n\n"+text,Extra.HTML()) 
       } else {
-        response = await getMember(ctx,username)
-        if (response == null){
+        
+        const response = (await axios.get(app_domain + '/business/groups/members/' + username,{
+          data:{
+            userID: ctx.from.id
+          }
+        })).data;
+        
+        if(response.status == "fail"){
           return ctx.reply(username + " is not a member, sorry")
         }
+        
         text += '' + response.name + ' tasks: ' + response.tasks.length +' \n';
-        await ctx.reply("Here " + username+ "! \n\n" + text,Extra.HTML()) 
+        
+        return ctx.reply("Here " + username+ "! \n\n" + text,Extra.HTML()) 
       }
   
     } catch (error) {

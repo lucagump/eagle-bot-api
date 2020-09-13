@@ -2,20 +2,6 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function inviteToCollaborate(msg,repository,username){
-  try {
-    const response = await axios.put(app_domain + '/actions/repositories/'+repository+'/collaborators/'+username,{
-      userID: msg.from.id
-    });
-    if(response.status == 204){
-      return "204"
-    }
-    return response.data
-  } catch (error) {
-    return error.message
-  }
-}
-
 module.exports = telegrambot => {
 
   telegrambot.hears('Add Collab 👨‍💻', async function (ctx) {
@@ -35,14 +21,19 @@ module.exports = telegrambot => {
       repository = inputData[2];
     
       try {
-        const message = await inviteToCollaborate(ctx,repository,username)
-        if(message == "204") {
-          return ctx.reply("User is already a collaborator")
-        }
+        
+        const response = (await axios.put(app_domain + '/business/repositories/'+repository+'/collaborators/'+username,{
+          userID: ctx.from.id
+        })).data;
+
+        if (response.status == "fail") {
+          return ctx.reply("I can't invite the user, check the username or repository") 
+        }  
+        
         return ctx.reply(username + " has been invited to collaborate in "+repository) 
       } catch (error) {
-        await ctx.reply(username + " " + message + " " + "Error to Handle")
         console.log(error);
+        ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML());
       } 
     } else {
       ctx.reply("Send the command in this format:\n\n"+

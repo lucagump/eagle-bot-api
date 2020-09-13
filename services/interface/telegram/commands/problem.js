@@ -2,23 +2,6 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function createIssueTask(msg,title,description,repository,group){
-  try {
-    const response = await axios.post(app_domain + '/actions/issues',{
-      userID: (msg.from.id).toString(),
-      title: title,
-      description: description,
-      repository: repository,
-      group: group
-    });
-    return response.data
-  } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
-  }
-}
-
 module.exports = telegrambot => {
 
   telegrambot.command('problem', async function (ctx) {
@@ -37,8 +20,21 @@ module.exports = telegrambot => {
       group = inputData[4];
   
       try {
-        const message = await createIssueTask(ctx,title,description,repository,group)
-        return await ctx.reply("Issue is in "+ repository + " and in Airtable") 
+        const response = (await axios.post(app_domain + '/process/issues',{
+          userID: (ctx.from.id).toString(),
+          title: title,
+          description: description,
+          repository: repository,
+          group: group
+        })).data;
+
+        if(response.status == "fail"){
+          return ctx.reply("I can't create the issue or the task, sorry :(",Extra.HTML())
+        }
+
+        return await ctx.reply(response.statusCode + " - Issue is in "+ repository + " and in Airtable\n\n"+
+        "Airtable : "+ response.data.airtableTask +"\n"+" github : "+ response.data.githubIssue+"\n") 
+
       } catch (error) {
         console.log(error);
         return await ctx.reply("Issue: " + title + " " + "Error to Handle",Extra.HTML())

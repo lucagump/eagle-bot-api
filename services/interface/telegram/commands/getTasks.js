@@ -2,23 +2,14 @@ const axios = require('axios')
 const Extra = require('telegraf/extra')
 const { MESSAGES } = require('../common');
 
-async function getGroups(msg){
-  try {
-    const response = await axios.get(app_domain + '/actions/users/'+msg.from.id);
-    return response.data
-  } catch (error) {
-    return error
-  }
-} 
-
 module.exports = telegrambot => {
   telegrambot.hears('🔍 Get Tasks', async (ctx) => {
     await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   
     try {
-      const response = await getGroups(ctx)
-      console.log(response)
-      if (response.response.status == "404") {
+      const response = (await axios.get(app_domain + '/process/users/'+ctx.from.id)).data;
+
+      if (response.status == "fail") {
         return ctx.reply(MESSAGES.UNAUTHORIZED) 
       } 
       return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>

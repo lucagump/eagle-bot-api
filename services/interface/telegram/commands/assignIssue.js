@@ -24,19 +24,17 @@ module.exports = telegrambot => {
   
       try {
       
-        const response = await axios.post(app_domain + '/actions/issues/'+issueID,{
+        const response = (await axios.post(app_domain + '/business/issues/'+issueID,{
           userID: (ctx.from.id).toString(),
           username: username,
           repository: repository
-        });
+        })).data
         
-        message = response.data
-
-        if(message.title == null){
+        if(response.status == "fail"){
           return ctx.reply("Issue: " + issueID + " cannot be assigned",Extra.HTML())
         }
-        return await ctx.reply("Issue assign to "+ username) 
-      
+
+        return await ctx.reply("Issue assigned to " + username) 
       
       } catch (error) {
         console.log(error);

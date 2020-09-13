@@ -1,7 +1,7 @@
 var express = require('express');
 router = express.Router();
 
-const actions_controller = require('./controllers/actions.controllers');
+const process_controller = require('./controllers/process.controllers');
 
 // __________                                           
 // \______   \_______  ____   ____  ____   ______ ______
@@ -11,16 +11,17 @@ const actions_controller = require('./controllers/actions.controllers');
 //                               \/    \/     \/     \/ 
 
 
-router.post('/authentication', actions_controller.authenticateUser)
-router.delete('/logout/:userID', actions_controller.deleteUserFromDataBase)
+router.post('/login', process_controller.authenticateUser)
+router.get('/users/:userID', process_controller.getUser)
+router.delete('/logout/:userID', process_controller.logout)
 
-router.put('/tasks/:taskID', actions_controller.assignTask)
+router.post('/tasks', process_controller.createTask)
+router.post('/tasks/:group', process_controller.createGroupTask)
+router.post('/issues', process_controller.createIssue)
 
-router.post('/problems', actions_controller.createProblem)
+router.post('/problems', process_controller.createProblem)
 
-// params topics?
-router.get('/repositories/:userID', actions_controller.getGroupsRepositories)
-router.get('/topics/repositories/:userID', actions_controller.getGroupsRepositories)
+router.get('/repositories/:userID', process_controller.getGroupsRepositories)
 
 /*
 

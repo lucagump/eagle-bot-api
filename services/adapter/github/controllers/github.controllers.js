@@ -1,47 +1,8 @@
-const axios = require('axios')
+const axios = require('axios');
+const { response } = require('express');
 
 // Documentation
 // https://docs.github.com/en/rest/
-
-async function getRepositoryTopics(githubToken, repository) {
-    try {
-        const response = await axios.get(`https://api.github.com/repos/eagletrt/`+repository+`/topics`, {
-            headers: {
-                'Accept': 'application/vnd.github.mercy-preview+json',
-                'Authorization': `Bearer ${githubToken}`
-            }
-        });
-        repositoryTopics = response.data.names 
-        return repositoryTopics
-    } catch (error) {
-        var response = []
-        response.status = error.response.status 
-        response.message = error.response.data.message 
-        return response
-    }  
-}
-
-async function getReposistoryNameFromOrganization(githubToken) {
-    var response = []
-    try {
-        const repositories = (await axios.get(`https://api.github.com/orgs/eagletrt/repos`, {
-            headers: {
-                'Accept': 'application/vnd.github.v3+json',
-                'Authorization': `Bearer ${githubToken}`
-            }
-        })).data
-        
-        for (let index = 0; index < repositories.length; index++) {
-            response.push(repositories[index].name)
-        }
-        
-        return response   
-    } catch (error) {
-        response.status = error.response.status 
-        response.message = error.response.data.message 
-        return response
-    }  
-}
 
 module.exports = {
 
@@ -63,11 +24,7 @@ module.exports = {
                 var response = []
                 for (let index = 0; index < repositories.length; index++) {
                     response.push(repositories[index].name)
-                }
-
-                // if(response.status != null){
-                //     return res.status(response.status).send(response.status + " " + response.message)
-                // }    
+                } 
 
                 return res.status(200).send({
                     status: 'success',
@@ -76,10 +33,10 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Repositories couldn\'t be found'
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
                 }) 
             }
         } else {
@@ -105,12 +62,8 @@ module.exports = {
             };
             
             try {
-                const response = await axios(config)
+                const response = (await axios(config)).data
 
-                // if(response.status != null){
-                //     return res.status(response.status).send(response.status + " " + response.message)
-                // }        
-                
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
@@ -118,10 +71,10 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Invitation couldn\'t be sent'
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
                 }) 
             }
         } else {
@@ -144,27 +97,19 @@ module.exports = {
                 }
             };
             try {
-                const response = await axios(config)
-
-                if(response.status == 204){
-                    console.log(response.statusText)
-                    return res.status(204).send({
-                        status: 'fail',
-                        statusCode: 204,
-                        data: 'User is already a Collaborator'
-                    }) 
-                }
+                const response = (await axios(config)).data
+                
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: 'User has been invited'
+                    data: response
                 })        
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Invitation couldn\'t be sent'
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
                 }) 
             }
         } else {
@@ -182,17 +127,14 @@ module.exports = {
                 method: 'get',
                 url: 'https://api.github.com/repos/eagletrt/'+req.params.repository+'/topics',
                 headers: { 
-                    'Accept': 'application/vnd.github.v3+json',
+                    'Accept': 'application/vnd.github.mercy-preview+json',
                     'Authorization': `Bearer ${req.body.githubToken}`
                 }
             };
             
             try {
-                const response = await axios(config)
-                var data = response.data.names                 
-                // if(response.status != null){
-                //     return res.status(response.status).send(response.status + " " + response.message)
-                // }    
+                const response = (await axios(config)).data
+                var data = response.names                 
 
                 return res.status(200).send({
                     status: 'success',
@@ -201,10 +143,10 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Repositories couldn\'t be found'
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
                 }) 
             }
         } else {
@@ -296,11 +238,11 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Issues couldn\'t be found'
-                })                   
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
+                })                  
             }
 
         } else {
@@ -339,11 +281,11 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Issue couldn\'t be created'
-                })                    
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
+                })                 
             }
 
         } else {
@@ -371,11 +313,11 @@ module.exports = {
             };
             
             try {
-                const issue = await axios(config)
+                const issue = (await axios(config)).data
                 var response = {
-                    number: issue.data.number,                    
-                    title: issue.data.title,                    
-                    url: issue.data.url                    
+                    number: issue.number,                    
+                    title: issue.title,                    
+                    url: issue.url                    
                 }
                 return res.status(200).send({
                     status: 'success',
@@ -384,10 +326,10 @@ module.exports = {
                 })
             } catch (error) {
                 console.log(error)
-                return res.status(500).send({
+                return res.status(error.response.status).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Issue couldn\'t be assigned'
+                    statusCode: error.response.status,
+                    errorMessage: error.response.data.message
                 })                   
             }
 

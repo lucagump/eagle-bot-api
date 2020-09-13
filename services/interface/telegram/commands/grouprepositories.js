@@ -2,26 +2,21 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function getRepositoriesGroups(msg){
-  try {
-    const response = await axios.get(app_domain + '/actions/topics/repositories/'+ msg.from.id);
-    return response.data
-  } catch (error) {
-    return error
-  }
-}
-
 module.exports = telegrambot => {
   telegrambot.command('grouprepositories', async function (ctx) {
     try {
-      const response = await getRepositoriesGroups(ctx)
-      if (response.response.status == "404") {
+      const response = (await axios.get(app_domain + '/process/repositories/'+ ctx.from.id)).data;
+      
+      if (response.status == "404") {
         return ctx.reply(MESSAGES.UNAUTHORIZED) 
       }     
+
+      repositories = response.data;
+
       var text = '';
-      for(var k in response) {
+      for(var k in repositories) {
         text += "\n" +  k + '\n\n'; 
-        response[k].forEach(function(element) {
+        repositories[k].forEach(function(element) {
           text += element + '\n'
         })    
       }

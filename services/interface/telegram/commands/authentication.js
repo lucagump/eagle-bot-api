@@ -2,29 +2,6 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function authentication(msg,airtableToken,airtableBase,githubToken,usernameGitHub,groups){
-  try {
-    const response = await axios.post(app_domain + '/actions/users',{
-      userID: (msg.from.id).toString(),
-      chatID: (msg.chat.id).toString(),
-      usernameTelegram: msg.from.username,
-      usernameGitHub: usernameGitHub,
-      groups: groups,
-      githubToken: githubToken,
-      airtableToken: airtableToken,
-      airtableBase: airtableBase,
-    });
-    if(response.status == 404){
-      return "404 - Cannot add user"
-    }
-    return response.data
-  } catch (error) {
-      var errorMessage = "Something bad just happened! Check your Server " + error.status
-      console.log(error)
-      return errorMessage
-  }
-}
-
 module.exports = telegrambot => {
   telegrambot.hears('🤖Authentication', async function (ctx) {
     await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
@@ -54,14 +31,28 @@ module.exports = telegrambot => {
   
       //Check se l'utente è già stato inserito nel db, altrimenti update
       try {
-        const message = await authentication(ctx,airtableToken,airtableBase,githubToken,usernameGitHub,groups)
-        await ctx.reply( ctx.from.username + "i tuoi token sono stati aggiunti correttamente") 
+        const response = (await axios.post(app_domain + '/process/login',{
+          userID: (ctx.from.id).toString(),
+          chatID: (ctx.chat.id).toString(),
+          usernameTelegram: ctx.from.username,
+          usernameGitHub: usernameGitHub,
+          groups: groups,
+          githubToken: githubToken,
+          airtableToken: airtableToken,
+          airtableBase: airtableBase,
+        })).data;
+
+        if ( response.status == "fail") {
+          return ctx.reply("User: " + username + " cannot login",Extra.HTML())          
+        }
+        return ctx.reply( ctx.from.username + " is logged in correctly") 
+
       } catch (error) {
-        await ctx.reply(ctx.from.username + " " + message + " " + "Error to Handle")
+        await ctx.reply(ctx.from.username + " cannot login")
         console.log(error);
       } 
     } else {
-      ctx.reply("Send the command in this format:"+
+      ctx.reply("Send the command in this format: \n\n"+
       "/authentication airtableToken airtableBase githubToken usernameGitHub group1 group2"
     );
     }

@@ -2,10 +2,10 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function assignTask(msg,taskID,username){
+async function assignTask(ctx,taskID,username){
   try {
-    const response = await axios.put(app_domain + '/actions/tasks/'+taskID,{
-      'userID': (msg.from.id).toString(),
+    const response = await axios.put(app_domain + '/business/tasks/'+ taskID,{
+      'userID': (ctx.from.id).toString(),
       'username': username,
     });
     console.log(response)
@@ -36,11 +36,18 @@ module.exports = telegrambot => {
       username = inputData[2];
   
       try {
-        const message = await assignTask(ctx,taskID,username)
-        if ( message == "Something bad just happened! Check your Server") {
-          return ctx.reply(message.data) 
+        const response = (await axios.put(app_domain + '/business/tasks/'+ taskID,{
+          'userID': (ctx.from.id).toString(),
+          'username': username,
+        })).data;
+        
+        if ( response.status == "fail") {
+          return ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())          
         }
-        return ctx.reply(message.data) 
+
+        return ctx.reply(response.data) 
+
+
       } catch (error) {
         console.log(error);
         return ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())

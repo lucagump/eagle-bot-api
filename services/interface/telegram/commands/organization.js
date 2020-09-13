@@ -2,19 +2,7 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function inviteToOrganization(msg,email){
-  try {
-    const response = await axios.post(app_domain + '/actions/users/githubInvitation',{
-      'userID': msg.from.id,
-      'email': email
-  });
-    return response.data
-  } catch (error) {
-    var errorMessage = "Something bad just happened! Check your Server " + error.status
-    console.log(error)
-    return errorMessage
-  }
-}
+
 
 module.exports = telegrambot => {
   telegrambot.hears('Join Org🤝', async function (ctx) {
@@ -33,7 +21,15 @@ module.exports = telegrambot => {
       email = inputData[1];
     
       try {
-        const message = await inviteToOrganization(ctx,email)
+        const response = (await axios.post(app_domain + '/business/users/githubInvitation',{
+          'userID': ctx.from.id,
+          'email': email
+        })).data; 
+        
+        if(response.status == "fail"){
+          return ctx.reply("I can't invite the user to join the organization, maybe he is already part of it or the eamil is not correct, sorry :(",Extra.HTML())
+        }
+
         return await ctx.reply(email + "has been invited to join organization") 
       } catch (error) {
         console.log(error);

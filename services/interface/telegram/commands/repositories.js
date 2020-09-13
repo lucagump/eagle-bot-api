@@ -2,9 +2,9 @@ const axios = require('axios');
 const Extra = require('telegraf/extra');
 const { MESSAGES } = require('../common');
 
-async function getRepositories(msg){
+async function getRepositories(ctx){
   try {
-    const response = await axios.get(app_domain + '/actions/repositories/'+msg.from.id);
+    const response = await axios.get(app_domain + '/business/repositories/'+ctx.from.id);
     return response
   } catch (error) {
     var errorMessage = "Something bad just happened! Check your Server " + error.status
@@ -16,12 +16,18 @@ async function getRepositories(msg){
 module.exports = telegrambot => {
   telegrambot.command('repositories', async function (ctx) {
     try {
-      const response = (await getRepositories(ctx)).data
+      const response = (await axios.get(app_domain + '/business/repositories/'+ctx.from.id)).data;
+
+      if(response.status == "fail"){
+        return ctx.reply("I can't find your repositories, sorry :(",Extra.HTML())
+      }
+
       var text = '';
-      for (var i = 0; i < response.length; i++) {
+      for (var i = 0; i < response.data.length; i++) {
           text += response[i] + ' \n';
       }
-      await ctx.reply("Here a list of yours repositories \n\n"+text,Extra.HTML()) 
+
+      return ctx.reply("Here a list of yours repositories: \n\n"+text,Extra.HTML()) 
     } catch (error) {
       ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       console.log(error);

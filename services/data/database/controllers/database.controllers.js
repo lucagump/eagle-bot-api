@@ -66,7 +66,7 @@ module.exports = {
             return res.status(400).send({
                 status: 'fail',
                 statusCode: 400,
-                data: 'Bad Request'
+                errorMessage: 'Bad Request'
             })
         } 
     },
@@ -85,7 +85,7 @@ module.exports = {
                     return res.status(200).send({
                         status: 'success',
                         statusCode: 200,
-                        errorMessage: users
+                        data: users
                       })
                 } else {
                     return res.status(404).send({
@@ -113,7 +113,7 @@ module.exports = {
                         return res.status(200).send({
                             status: 'success',
                             statusCode: 200,
-                            errorMessage: user
+                            data: user
                         })
                     } else {
                         return res.status(404).send({
@@ -157,7 +157,7 @@ module.exports = {
                     return res.status(201).send({
                         status: 'success',
                         statusCode: 201,
-                        errorMessage: user
+                        data: user
                       })
                 } else {
                     return res.status(404).send({
@@ -184,7 +184,7 @@ module.exports = {
                         return res.status(500).send({
                             status: 'fail',
                             statusCode: 500,
-                            errorMessage: 'User couldn\'t be deleted'
+                            errorMessage: 'User couldn\'t be deleted',
                           })
                     }
                     if(user != null){
@@ -197,7 +197,7 @@ module.exports = {
                         return res.status(404).send({
                             status: 'fail',
                             statusCode: 404,
-                            errorMessage: 'User couldn\'t be found, please try again later'
+                            errorMessage: 'User couldn\'t be found, please try again later',
                         })
                     }
                 }
@@ -206,7 +206,7 @@ module.exports = {
             return res.status(400).send({
                 status: 'fail',
                 statusCode: 400,
-                data: 'Bad Request'
+                errorMessage: 'Bad Request',
             })
         } 
     }
