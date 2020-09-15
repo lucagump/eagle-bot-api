@@ -8,7 +8,7 @@ To try it, chat with the Bot! [TelegramBot](https://t.me/eagle_git_bot)
 
 ## Project Structure
 
-![Schema](documents/schema.png)
+![SchemaOverview](documents/schema-Page-1.png)
 
 ## Install
 ```javascript
@@ -32,5 +32,7 @@ The complete generated document of the API is available [here](https://documente
 
 ## Report
 
-The [report ](https://github.com/lucagump/eagle-bot-api/blob/master/documents/eagle-bot-api-report.pdf) is in the /documents folder  
+![SchemaExample](documents/schema-Page-2.png)
+
+The [report ](https://github.com/lucagump/eagle-bot-api/blob/master/documents/report-sde.pdf) is in the /documents folder  
 
