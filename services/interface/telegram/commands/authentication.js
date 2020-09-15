@@ -43,13 +43,13 @@ module.exports = telegrambot => {
         })).data;
 
         if ( response.status == "fail") {
-          return ctx.reply("User: " + username + " cannot login",Extra.HTML())          
+          return ctx.reply("User: " + ctx.from.username + " cannot login. \n" + response.errorMessage,Extra.HTML())          
         }
         return ctx.reply( ctx.from.username + " is logged in correctly") 
 
       } catch (error) {
-        await ctx.reply(ctx.from.username + " cannot login")
         console.log(error);
+        await ctx.reply(ctx.from.username + " cannot login")
       } 
     } else {
       ctx.reply("Send the command in this format: \n\n"+

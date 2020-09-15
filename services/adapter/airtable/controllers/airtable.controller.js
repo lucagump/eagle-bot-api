@@ -111,7 +111,7 @@ module.exports = {
                     .firstPage();
 
                 records.forEach(element => {
-                    if(element.fields.Group.includes(req.params.group)){
+                    if(element.fields.Group.includes(req.params.groups)){
                         data.push({
                             id: element.id, 
                             name: element.fields.Collaborator.name,
@@ -206,7 +206,7 @@ module.exports = {
         }
     },
     getGroupTasks: async function(req,res){
-        if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.group != null){
+        if (req.body.airtableToken != null && req.body.airtableBase != null && req.params.groups != null){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
             try {
                 var records = await base('Tasks').select().firstPage();
@@ -214,7 +214,7 @@ module.exports = {
                 var data = []
                 records.forEach(element => {
                     if(element.fields.Group != null) {
-                        if(element.fields.Group.includes(req.params.group)){
+                        if(element.fields.Group.includes(req.params.groups)){
                             data.push({
                                 id: element.id,
                                 task: element.fields.Task, 
@@ -285,12 +285,12 @@ module.exports = {
         }
     },
     createAirTableTaskGroup: async function(req, res) {
-        if (req.body.airtableToken != null && req.body.airtableBase != null && req.body.title != null && req.params.group != null && req.body.assign != null ){
+        if (req.body.airtableToken != null && req.body.airtableBase != null && req.body.title != null && req.params.groups != null && req.body.assign != null ){
             var base = new Airtable({ 'apiKey': req.body.airtableToken }).base(req.body.airtableBase); 
             try {
                 const newTask = await base('Tasks').create({
                         "Task": req.body.title,
-                        "Group": [req.params.group],
+                        "Group": [req.params.groups],
                         "Description": req.body.description,
                         "Status": "🧪In Box🔨",
                         "AssignTo": [req.body.assign]

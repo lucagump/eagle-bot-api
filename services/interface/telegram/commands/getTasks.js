@@ -12,10 +12,11 @@ module.exports = telegrambot => {
       if (response.status == "fail") {
         return ctx.reply(MESSAGES.UNAUTHORIZED) 
       } 
+
       return ctx.reply('Select a <b>Group</b>', Extra.HTML().markup((m) =>
       m.inlineKeyboard([
-        m.callbackButton(response.groups[0], response.groups[0]),
-        m.callbackButton(response.groups[1], response.groups[1]),
+        m.callbackButton(response.data.groups[0], response.data.groups[0]),
+        m.callbackButton(response.data.groups[1], response.data.groups[1]),
       ])))  
     
     } catch (error) {

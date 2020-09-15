@@ -24,15 +24,18 @@ module.exports = telegrambot => {
           return ctx.reply("Can't find the <b>repository</b> \n\n"+text,Extra.HTML()) 
         }
         var text = '';
-        
-        response.data.forEach(element => {
+        var data = response.data 
+        data.forEach(element => {
           text += '> ' + element.title + ' \n';
         });
         
         await ctx.reply("Here a list of yours <b>issues</b> \n\n"+text,Extra.HTML()) 
       } catch (error) {
         console.log(error);
-        await ctx.reply(response + " " + "Error to Handle")
+        if( error.response.data.statusCode == 404 )  {
+          return ctx.reply('<i>I can\'t find the Repository </i> '+ repository,Extra.HTML())
+        }
+        ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       } 
     } else {
       ctx.reply("To get the issues just send the command as describe in the example below: \n\n /getissues repository")

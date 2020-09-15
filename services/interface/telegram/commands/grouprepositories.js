@@ -22,8 +22,8 @@ module.exports = telegrambot => {
       }
       await ctx.reply("Here a list of yours <b>Repositories</b> \n"+text,Extra.HTML()) 
     } catch (error) {
-      ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       console.log(error);
+      ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
     }
   });
 };

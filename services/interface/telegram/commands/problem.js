@@ -8,7 +8,7 @@ module.exports = telegrambot => {
     var title = null;
     var description = null;
     var repository = null;
-    var group = null;
+    var groups = null;
   
     var inputData = ctx.update.message.text.split(" / ")
     console.log(inputData)
@@ -17,22 +17,22 @@ module.exports = telegrambot => {
       title = inputData[1]; 
       description = inputData[2];
       repository = inputData[3];
-      group = inputData[4];
+      groups = inputData[4];
   
       try {
-        const response = (await axios.post(app_domain + '/process/issues',{
+        const response = (await axios.post(app_domain + '/process/problems',{
           userID: (ctx.from.id).toString(),
           title: title,
           description: description,
           repository: repository,
-          group: group
+          groups: groups
         })).data;
 
         if(response.status == "fail"){
           return ctx.reply("I can't create the issue or the task, sorry :(",Extra.HTML())
         }
 
-        return await ctx.reply(response.statusCode + " - Issue is in "+ repository + " and in Airtable\n\n"+
+        return await ctx.reply(title + " - Issue is in "+ repository + " and in Airtable\n\n"+
         "Airtable : "+ response.data.airtableTask +"\n"+" github : "+ response.data.githubIssue+"\n") 
 
       } catch (error) {
@@ -40,7 +40,8 @@ module.exports = telegrambot => {
         return await ctx.reply("Issue: " + title + " " + "Error to Handle",Extra.HTML())
       } 
     } else {
-      ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+      ctx.reply("Send the command in this format:\n\n"+
+      '/problem / title / description / repository / group \n\n')
     }
   });
 

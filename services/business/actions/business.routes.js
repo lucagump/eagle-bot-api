@@ -14,10 +14,10 @@ router.get('/groups/members', business_controller.getMembers)
 router.get('/groups/members/:username', business_controller.getMember)
 
 router.post('/tasks', business_controller.createTask)
-router.post('/tasks/:group', business_controller.createGroupTask)
+router.post('/tasks/:groups', business_controller.createGroupTask)
 router.get('/tasks/:userID', business_controller.getTasks)
 router.put('/tasks/:taskID', business_controller.assignTask)
-router.get('/tasks/groups/:group/:userID', business_controller.getGroupTasks)
+router.get('/tasks/groups/:groups/:userID', business_controller.getGroupTasks)
 
 
 router.post('/issues', business_controller.createIssue)
@@ -29,7 +29,7 @@ router.post('/problems', business_controller.createIssueTask)
 
 
 router.get('/repositories/:userID', business_controller.getRepositories)
-router.get('/topics/repositories/:userID', business_controller.getGroupsRepositories)
+router.get('/topics/repositories', business_controller.getGroupsRepositories)
 
 router.put('/repositories/:repository/collaborators/:username', business_controller.inviteCollaboration)
 router.post('/users/githubInvitation', business_controller.inviteOrganization)

@@ -32,8 +32,11 @@ module.exports = telegrambot => {
         
         return ctx.reply(username + " has been invited to collaborate in "+repository) 
       } catch (error) {
+        if( error.response.data.statusCode == 500 )  {
+          return ctx.reply('<i>Check username or repository 😊</i>',Extra.HTML())
+        }
         console.log(error);
-        ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML());
+        return ctx.reply('<i>Check username or repository 😊</i>',Extra.HTML())
       } 
     } else {
       ctx.reply("Send the command in this format:\n\n"+

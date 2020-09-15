@@ -14,6 +14,9 @@ module.exports = telegrambot => {
       console.log(response)
       return ctx.reply('Here are yours Groups: \n\n' + response.data.groups[0] + "\n" + response.data.groups[1], Extra.HTML)
     } catch (error) {
+      if( error.response.data.statusCode == 404 )  {
+        return ctx.reply('<i>I can\'t find the User 😊</i>',Extra.HTML())
+      }
       ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       console.log(error);
     }

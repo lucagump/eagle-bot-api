@@ -14,12 +14,12 @@ const airtable_controller = require('./controllers/airtable.controller');
 	GET		/form
 			/members/BTC
 			/members/:username
-			/groups/:group
+			/groups/:groups
 			/tasks
 			/tasks/:taskID
-			/tasks/groups/:group
+			/tasks/groups/:groups
 	POST 	/tasks
-	POST 	/tasks/:group
+	POST 	/tasks/:groups
 	PUT 	/tasks/:taskID
 */
 
@@ -27,13 +27,13 @@ router.get('/form', airtable_controller.getMembersForm)
 
 router.get('/members', airtable_controller.getMembers)
 router.get('/members/:username', airtable_controller.getMember)
-router.get('/groups/:group', airtable_controller.getGroupsMembers)
+router.get('/groups/:groups', airtable_controller.getGroupsMembers)
 
 router.get('/tasks', airtable_controller.getTasks)
 router.get('/tasks/:taskID', airtable_controller.getTask)
-router.get('/tasks/groups/:group', airtable_controller.getGroupTasks)
+router.get('/tasks/groups/:groups', airtable_controller.getGroupTasks)
 router.post('/tasks', airtable_controller.createAirTableTask)
-router.post('/tasks/:group', airtable_controller.createAirTableTaskGroup)
+router.post('/tasks/:groups', airtable_controller.createAirTableTaskGroup)
 router.put('/tasks/:taskID', airtable_controller.assignTask)
 
 module.exports = router;

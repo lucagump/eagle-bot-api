@@ -3,6 +3,8 @@ const requireAll = require('require-all');
 
 const BOT_COMMANDS = requireAll({ dirname: `${__dirname}/commands` });
 console.log(BOT_COMMANDS)
+// https://api.telegram.org/bot1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo/setWebhook
+
 // 
 // .___        __                 _____                     
 // |   | _____/  |_  ____________/ ____\____    ____  ____  
@@ -14,6 +16,13 @@ console.log(BOT_COMMANDS)
 
 const token = '1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo' // process.env.TELEGRAM_TOKEN;
 const telegrambot = new Telegraf(token)
+
+if(process.env.NODE_ENV != "dev") {
+  const TELEGRAM_PORT = process.env.TELEGRAM_PORT
+  const URL = global.app_domain + "webhook"
+  telegrambot.telegram.setWebhook(URL)
+  telegrambot.startWebhook('/webhook', null, TELEGRAM_PORT)
+} 
 
 telegrambot.use(async (ctx, next) => {
   const start = new Date()

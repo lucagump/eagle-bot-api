@@ -30,13 +30,14 @@ module.exports = telegrambot => {
               return ctx.reply("I can't create the issue sorry :(") 
             }  
             
-            return await ctx.reply("Issue is in "+ repository) 
+            return await ctx.reply("Issue is in "+ repository+"\n\n"+response.data.githubIssue) 
           } catch (error) {
             console.log(error);
             return await ctx.reply("Issue: '" + title + "' " + "Error to Handle",Extra.HTML())
           } 
         } else {
-          ctx.reply("MESSAGES.HELP - Inserisci il numero corretto di valori")
+          ctx.reply("Send the command in this format:\n\n"+
+          '/newissue / title / description / repository')
         }
       });
 

@@ -27,8 +27,8 @@ module.exports = telegrambot => {
     if (inputData.length > 1 ) {
       username = inputData[1];
     }
-    try {
-      if (username == null){
+    if (username == null){
+      try {
 
         const response = (await axios.get(app_domain + '/business/groups/members',{
           data:{
@@ -37,16 +37,22 @@ module.exports = telegrambot => {
         })).data;
         
         if(response.status == "fail"){
-          return ctx.reply("I can't find the members, sorry :(",Extra.HTML())
+          return ctx.reply("I can't find the members, sorry :(\n" + response.errorMessage,Extra.HTML())
         }
         
-        for (var i = 0; i < response.length; i++) {
-            text += response[i].name + ' - tasks: ' + response[i].tasks.length +' \n';
+        var data = response.data.data
+
+        for (var i = 0; i < data.length; i++) {
+            text += data[i].name + ' - tasks: ' + data[i].tasks.length +' \n';
         }
         
         return ctx.reply("Here the Members list \n\n"+text,Extra.HTML()) 
-      } else {
-        
+      } catch (error) {
+        console.log(error);
+        ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
+      }
+    } else {
+      try {
         const response = (await axios.get(app_domain + '/business/groups/members/' + username,{
           data:{
             userID: ctx.from.id
@@ -56,15 +62,19 @@ module.exports = telegrambot => {
         if(response.status == "fail"){
           return ctx.reply(username + " is not a member, sorry")
         }
-        
-        text += '' + response.name + ' tasks: ' + response.tasks.length +' \n';
+        var data = response.data.data
+        text += '' + data.name + ' tasks: ' + data.tasks.length +' \n';
         
         return ctx.reply("Here " + username+ "! \n\n" + text,Extra.HTML()) 
+    
+
+      } catch (error) {
+        console.log(error);
+        if( error.response.data.statusCode == 404 )  {
+          return ctx.reply('<i>I can\'t find the User 😊</i>'+username,Extra.HTML())
+        }
+        ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
       }
-  
-    } catch (error) {
-      ctx.reply('<i>Error to Handle 😊</i>',Extra.HTML())
-      console.log(error);
     }
   });
 

@@ -29,8 +29,8 @@ module.exports = telegrambot => {
         if(response.status == "fail"){
           return ctx.reply("I can't invite the user to join the organization, maybe he is already part of it or the eamil is not correct, sorry :(",Extra.HTML())
         }
-
-        return await ctx.reply(email + "has been invited to join organization") 
+        console.log(response)
+        return await ctx.reply(email + " has been invited to join organization") 
       } catch (error) {
         console.log(error);
         return await ctx.reply(email + " " + message + " " + "Error to Handle")

@@ -21,10 +21,10 @@ module.exports = telegrambot => {
       if(response.status == "fail"){
         return ctx.reply("I can't find your repositories, sorry :(",Extra.HTML())
       }
-
+      var data = response.data
       var text = '';
-      for (var i = 0; i < response.data.length; i++) {
-          text += response[i] + ' \n';
+      for (var i = 0; i < data.length; i++) {
+          text += data[i] + ' \n';
       }
 
       return ctx.reply("Here a list of yours repositories: \n\n"+text,Extra.HTML()) 

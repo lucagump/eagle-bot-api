@@ -157,63 +157,7 @@ module.exports = {
             })
         }
     },
-    getRepositoriesByTopics: async function(req,res){
-        if (req.body.githubToken != null) {       
-            var repositories = ['eagletrt.github.io','chimera-steeringwheel','chimera-bms','chimera-sensors','fenice-telemetria-sender','can-analyzer','telemetry-tools','api-swe','can-bus-id-generator','Matlab-data-viewer','telemetria-sender-fe','telemetria-sender-server','docker_control','eagletrt-telemetria-exporter','documentation']
-            var repositoryContainsTag = ["volante","telemetria","fenice","chimera"]
-            //var topics = req.body.topics
-            var repositoriesWithTopics = {}
-            try {
-                // var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
-                if (repositories == null || repositories.status != null){
-                    return res.status(500).send('500 - Internal Server Error')     
-                } 
-                // console.log(repositories)
-                repositories.forEach(async function(element) {
-                    //var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,element)
-                    if (repositoryContainsTag == null || repositoryContainsTag.status != null){
-                        return res.status(500).send('500 - Internal Server Error')     
-                    } 
-                    //console.log(repositoryContainsTag) 
-                    //var topics = req.body.topics
-                    var topics = ["volante","telemetria"]
-                    var result = []
-                    for (let index = 0; index < topics.length; index++) {
-                        if(repositoryContainsTag.includes(topics[index])){
-                            result.push(topics[index])
-                        }
-                    }
-                    repositoriesWithTopics[element] = result;
-                });
-                
-                //console.log(repositoriesWithTopics)
-                var response = {};
-                for (const key in repositoriesWithTopics) {
-                    for (const element of repositoriesWithTopics[key]) {
-                        response[element] = response[element] ? [...response[element], key] : [key];
-                    }
-                }
-                return res.status(200).send({
-                    status: 'success',
-                    statusCode: 200,
-                    data: response
-                })            
-            } catch (error) {
-                console.log(error)
-                return res.status(500).send({
-                    status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Repositories couldn\'t be found'
-                })        
-            }
-        } else {
-            return res.status(400).send({
-                status: 'fail',
-                statusCode: 400,
-                data: 'Bad Request'
-            })
-        }
-    },
+
     getRepositoryIssues: async function(req, res) {
         if (req.body.githubToken != null && req.params.repository != null) {       
             var config = {
@@ -274,6 +218,7 @@ module.exports = {
                     title: issue.data.title,                    
                     url: issue.data.url                    
                 }
+    
                 return res.status(201).send({
                     status: 'success',
                     statusCode: 201,
@@ -333,6 +278,67 @@ module.exports = {
                 })                   
             }
 
+        } else {
+            return res.status(400).send({
+                status: 'fail',
+                statusCode: 400,
+                data: 'Bad Request'
+            })
+        }
+    },
+
+
+
+
+    getRepositoriesByTopics: async function(req,res){
+        if (req.body.githubToken != null) {       
+            var repositories = ['eagletrt.github.io','chimera-steeringwheel','chimera-bms','chimera-sensors','fenice-telemetria-sender','can-analyzer','telemetry-tools','api-swe','can-bus-id-generator','Matlab-data-viewer','telemetria-sender-fe','telemetria-sender-server','docker_control','eagletrt-telemetria-exporter','documentation']
+            var repositoryContainsTag = ["volante","telemetria","fenice","chimera"]
+            //var topics = req.body.topics
+            var repositoriesWithTopics = {}
+            try {
+                // var repositories = await getReposistoryNameFromOrganization(req.body.githubToken)
+                if (repositories == null || repositories.status != null){
+                    return res.status(500).send('500 - Internal Server Error')     
+                } 
+                // console.log(repositories)
+                repositories.forEach(async function(element) {
+                    //var repositoryContainsTag = await getRepositoryTopics(req.body.githubToken,element)
+                    if (repositoryContainsTag == null || repositoryContainsTag.status != null){
+                        return res.status(500).send('500 - Internal Server Error')     
+                    } 
+                    //console.log(repositoryContainsTag) 
+                    //var topics = req.body.topics
+                    var topics = ["volante","telemetria"]
+                    var result = []
+                    for (let index = 0; index < topics.length; index++) {
+                        if(repositoryContainsTag.includes(topics[index])){
+                            result.push(topics[index])
+                        }
+                    }
+                    repositoriesWithTopics[element] = result;
+                });
+                
+                //console.log(repositoriesWithTopics)
+                var response = {};
+                for (const key in repositoriesWithTopics) {
+                    for (const element of repositoriesWithTopics[key]) {
+                        response[element] = response[element] ? [...response[element], key] : [key];
+                    }
+                }
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                })            
+            } catch (error) {
+                console.log(error)
+                return res.status(500).send({
+                    status: 'fail',
+                    statusCode: 500,
+                    errorMessage: 'Repositories couldn\'t be found'
+                })        
+            }
         } else {
             return res.status(400).send({
                 status: 'fail',

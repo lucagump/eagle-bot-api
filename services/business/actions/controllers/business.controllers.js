@@ -20,33 +20,21 @@ module.exports = {
                         errorMessage: task.errorMessage
                     })
                 }                
-                
-                var membersInfos = []    
-                members.forEach(element => {
-                    if(element.fields.Group.includes(req.params.group)){
-                        membersInfos.push({
-                            id: element.id, 
-                            name: element.fields.Collaborator.name,
-                            groups: element.fields.Group,
-                            tasks: element.fields.Tasks
-                        })
-                    } 
-                });
 
-                var minTask = membersInfos[0];      
-                
-                for (i = 0; i < membersInfos.length; i++){
-                    if (minTask.tasks.length > (membersInfos[i].tasks).length) {
-                        minTask = membersInfos[i];
+                var minTask = members[0];      
+                members.forEach(element => {
+                    if (minTask.tasks.length > (element.tasks).length) {
+                        minTask = element;
                     }
-                }
+                });
+     
                 
                 const task = (await axios.post(app_domain + "/airtable/tasks",{
                     "title": req.body.title,
                     "description": req.body.description,
                     "assign": minTask.id,
-                    "airtableToken": airtableToken,  
-                    "airtableBase": airtableBase
+                    'airtableToken': req.body.airtableToken,  
+                    'airtableBase': req.body.airtableBase
                 })).data
                 
                 if(task.status == "fail"){
@@ -69,12 +57,6 @@ module.exports = {
                     statusCode: 500,
                     errorMessage: 'Internal Server Error'
                 })
-                // come funzionano le eccezioni qui? 
-                return res.status(error.response.status).send({
-                    status: 'fail',
-                    statusCode: error.response.status,
-                    errorMessage: error.response.data.errorMessage
-                }) 
             }
         }else{
             return res.status(400).send({
@@ -85,15 +67,17 @@ module.exports = {
         }
     },
     createGroupTask: async function(req, res) {
-        if(req.params.group != null && req.body.title != null && req.body.description != null) {
+        if(req.params.groups != null && req.body.title != null && req.body.description != null) {
             try {
+
+                // Member
                 const members = (await axios.get(app_domain + '/airtable/members', {
                     data:{
                         'airtableToken': req.body.airtableToken,  
                         'airtableBase': req.body.airtableBase
                     }
                 })).data
-                
+
                 if(members.status == "fail"){
                     return res.status(500).send({
                         status: 'fail',
@@ -101,34 +85,37 @@ module.exports = {
                         errorMessage: task.errorMessage
                     })
                 }                
-                
-                var membersInfos = []    
-                members.forEach(element => {
-                    if(element.fields.Group.includes(req.params.group)){
+
+                var membersInfos = []  
+                var membersData = members.data
+
+                membersData.forEach(element => {
+                    if(element.groups.includes(req.params.groups)){
                         membersInfos.push({
                             id: element.id, 
-                            name: element.fields.Collaborator.name,
-                            groups: element.fields.Group,
-                            tasks: element.fields.Tasks
+                            name: element.name,
+                            groups: element.groups,
+                            tasks: element.tasks
                         })
                     } 
                 });
 
                 var minTask = membersInfos[0];      
-                
+
                 for (i = 0; i < membersInfos.length; i++){
                     if (minTask.tasks.length > (membersInfos[i].tasks).length) {
                         minTask = membersInfos[i];
                     }
                 }
-                
-                const task = (await axios.post(app_domain + "/airtable/tasks/groups/" + req.params.group,{
+
+                // Task                
+                const task = (await axios.post(app_domain + "/airtable/tasks/" + req.params.groups,{
                     "title": req.body.title,
                     "description": req.body.description,
-                    "group": req.params.group,
+                    "groups": req.params.groups,
                     "assign": minTask.id,
-                    "airtableToken": airtableToken,  
-                    "airtableBase": airtableBase
+                    'airtableToken': req.body.airtableToken,  
+                    'airtableBase': req.body.airtableBase
                 })).data
                 
                 if(task.status == "fail"){
@@ -151,12 +138,6 @@ module.exports = {
                     statusCode: 500,
                     errorMessage: 'Internal Server Error'
                 })
-                // come funzionano le eccezioni qui? 
-                return res.status(error.response.status).send({
-                    status: 'fail',
-                    statusCode: error.response.status,
-                    errorMessage: error.response.data.errorMessage
-                }) 
             }
         }else{
             return res.status(400).send({
@@ -167,7 +148,7 @@ module.exports = {
         }
     },
     createIssueTask: async function(req, res) {
-        if(req.body.groups && req.body.title != null && req.body.description != null && req.body.repository != null){
+        if(req.body.groups != null && req.body.title != null && req.body.description != null && req.body.repository != null){
 
             try {
                 
@@ -187,14 +168,16 @@ module.exports = {
                     })
                 }                
                 
-                var membersInfos = []    
-                members.forEach(element => {
-                    if(element.fields.Group.includes(req.params.group)){
+                var membersInfos = []  
+                var membersData = members.data
+
+                membersData.forEach(element => {
+                    if(element.groups.includes(req.body.groups)){
                         membersInfos.push({
                             id: element.id, 
-                            name: element.fields.Collaborator.name,
-                            groups: element.fields.Group,
-                            tasks: element.fields.Tasks
+                            name: element.name,
+                            groups: element.groups,
+                            tasks: element.tasks
                         })
                     } 
                 });
@@ -206,15 +189,16 @@ module.exports = {
                         minTask = membersInfos[i];
                     }
                 }
+                
 
                 // Task
-                const airtableTask = (await axios.post(app_domain + "/airtable/tasks/groups/" + req.body.group,{
+                const airtableTask = (await axios.post(app_domain + "/airtable/tasks/" + req.body.groups,{
                     "title": req.body.title,
                     "description": req.body.description,
                     "assign": minTask.id,
-                    "group": req.body.group,
-                    "airtableToken": airtableToken,  
-                    "airtableBase": airtableBase
+                    "groups": req.body.groups,
+                    'airtableToken': req.body.airtableToken,  
+                    'airtableBase': req.body.airtableBase
                 })).data
                 
                 if(airtableTask.status == "fail"){
@@ -225,12 +209,12 @@ module.exports = {
                     })
                 } 
                 // Issue
-                const githubIssue = await axios.post(app_domain + "/github/issues/"+req.body.repository,{
+                const githubIssue = (await axios.post(app_domain + "/github/issues/"+req.body.repository,{
                     'title': req.body.title,
                     'description': req.body.description,
                     'labels': req.body.labels,
                     'githubToken': req.body.githubToken
-                }).data
+                })).data
 
                 if(githubIssue.status == "fail"){
                     return res.status(500).send({
@@ -240,7 +224,7 @@ module.exports = {
                     })
                 }
                 var response = {
-                    "githubIssue": githubIssue.url,
+                    "githubIssue": githubIssue.data.url,
                     "airtableTask": airtableTask.data.id
                 }
                 return res.status(200).send({
@@ -267,13 +251,13 @@ module.exports = {
     createIssue: async function(req, res) {
         if(req.body.title != null && req.body.description != null && req.body.githubToken != null && req.body.repository != null){
             try {
-                const githubIssue = await axios.post(app_domain + "/github/issues/"+req.body.repository,{
+                const githubIssue = (await axios.post(app_domain + "/github/issues/"+req.body.repository,{
                     'title': req.body.title,
                     'description': req.body.description,
                     'labels': req.body.labels,
                     'githubToken': req.body.githubToken
-                }).data
-
+                })).data
+                
                 if(githubIssue.status == "fail"){
                     return res.status(500).send({
                         status: 'fail',
@@ -282,10 +266,14 @@ module.exports = {
                     })
                 }
                 var response = {
-                    "githubIssue": githubIssue.url
+                    "githubIssue": githubIssue.data.url
                 }
-                
-                await res.status(201).send(response);
+
+                return res.status(200).send({
+                    status: 'success',
+                    statusCode: 200,
+                    data: response
+                })
             } catch (error) {
                 console.log(error);
                 return res.status(500).send({
@@ -308,63 +296,64 @@ module.exports = {
                 var topics = req.body.topics
                 var repositoriesWithTopics = {}
 
-                const repositories = (await axios.get(`https://api.github.com/orgs/eagletrt/repos`, {
-                    headers: {
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `Bearer ${req.body.githubToken}`
+                const response = (await axios.get(app_domain + "/github/repositories", {
+                    data:{
+                        'githubToken': req.body.githubToken
                     }
                 })).data
 
-                if(repositories.status == "fail"){
+                if(response.status == "fail"){
                     return res.status(500).send({
                         status: 'fail',
-                        statusCode: repositories.statusCode,
-                        errorMessage: 'Internal Server Error - ' + repositories.errorMessage
+                        statusCode: response.statusCode,
+                        errorMessage: 'Internal Server Error - ' + response.errorMessage
                     })
                 } 
+                var repositories = response.data
 
-                for (let index = 0; index < repositories.length; index++) {
-                    response.push(repositories[index].name)
-                }
-
+                console.log(repositories)
+                
                 repositories.forEach(async function(element) {
-                    const repositoryContainsTag = (await axios.get(`https://api.github.com/repos/eagletrt/`+repository+`/topics`, {
-                        headers: {
-                            'Accept': 'application/vnd.github.mercy-preview+json',
-                            'Authorization': `Bearer ${req.body.githubToken}`
+                    var repositoryContains = (await axios.get(app_domain + "/github/repositories/"+element+"/topics", {
+                        data:{
+                            'githubToken': req.body.githubToken
                         }
-                    })).data.names;
+                    })).data
 
-                    if(repositoryContainsTag.status == "fail"){
+                    if(repositoryContains.status == "fail"){
                         return res.status(500).send({
                             status: 'fail',
-                            statusCode: repositoryContainsTag.statusCode,
-                            errorMessage: 'Internal Server Error - ' + repositoryContainsTag.errorMessage
+                            statusCode: repositoryContains.statusCode,
+                            errorMessage: 'Internal Server Error - ' + repositoryContains.errorMessage
                         })
                     } 
+                    var repositoryContainsTag = repositoryContains.data
+                    var repositoriesWithTopics = {}
 
-                    //console.log(repositoryContainsTag) 
                     var result = []
                     for (let index = 0; index < topics.length; index++) {
                         if(repositoryContainsTag.includes(topics[index])){
                             result.push(topics[index])
                         }
                     }
-                    repositoriesWithTopics[element] = result;
+                    if(result.length > 0){
+                        repositoriesWithTopics[element] = result;
+                    }
+                    console.log(repositoriesWithTopics)
                 });
                 
-                //console.log(repositoriesWithTopics)
-                var response = {};
+                // console.log(repositoriesWithTopics)
+                var responseInverted = {};
                 for (const key in repositoriesWithTopics) {
                     for (const element of repositoriesWithTopics[key]) {
-                        response[element] = response[element] ? [...response[element], key] : [key];
+                        responseInverted[element] = responseInverted[element] ? [...responseInverted[element], key] : [key];
                     }
                 }
                 
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: response
+                    data: responseInverted
                 });
             } catch (error) {
                 console.log(error);
@@ -398,18 +387,21 @@ module.exports = {
 
                 const members = await axios.get(app_domain + '/airtable/members', {
                     data:{
-                        'airtableToken': user.airtableToken,  
-                        'airtableBase': user.airtableBase
+                        'airtableToken': user.data.airtableToken,  
+                        'airtableBase': user.data.airtableBase
                     }
                 })
                 if(members.name == "Error"){
-                    return res.status(500).send(members.message)
+                    return res.status(500).send({
+                        status: 'fail',
+                        statusCode: members.statusCode,
+                        errorMessage: 'Internal Server Error - ' + members.errorMessage
+                    })
                 }
-
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: members
+                    data: members.data
                 })
             } catch (error) {
                 console.log(error);
@@ -442,8 +434,8 @@ module.exports = {
                 
                 const member = await axios.get(app_domain + '/airtable/members/'+ req.params.username, {
                     data:{
-                        'airtableToken': user.airtableToken,  
-                        'airtableBase': user.airtableBase
+                        'airtableToken': user.data.airtableToken,  
+                        'airtableBase': user.data.airtableBase
                     }
                 })
 
@@ -461,10 +453,11 @@ module.exports = {
                     data: member.data
                 });
             } catch (error) {
-                return res.status(500).send({
+                if( error.response.data.statusCode == 404 )
+                return res.status(404).send({
                     status: 'fail',
-                    statusCode: 500,
-                    errorMessage: 'Internal Server Error'
+                    statusCode: error.response.data.statusCode,
+                    errorMessage: error.response.data.errorMessage
                 })
             }
         }else{
@@ -490,8 +483,8 @@ module.exports = {
 
                 const assignTask = (await axios.put(app_domain + "/airtable/tasks/" + req.params.taskID,{
                     "username": req.body.username,
-                    "airtableToken": user.airtableToken,  
-                    "airtableBase": user.airtableBase
+                    "airtableToken": user.data.airtableToken,  
+                    "airtableBase": user.data.airtableBase
                 })).data            
                 
                 if(assignTask.status == "fail"){
@@ -524,7 +517,7 @@ module.exports = {
         }
     },
     getGroupTasks: async function(req, res) {
-        if(req.params.userID != null && req.params.group){
+        if(req.params.userID != null && req.params.groups){
             try {
                 const user = (await axios.get(app_domain + "/database/users/" + req.params.userID)).data
 
@@ -536,10 +529,10 @@ module.exports = {
                     })
                 } 
 
-                const groupTasks = (await axios.get(app_domain + '/airtable/tasks/groups/' + req.params.group, {
+                const groupTasks = (await axios.get(app_domain + '/airtable/tasks/groups/' + req.params.groups, {
                     data:{
-                        "airtableToken": user.airtableToken,
-                        "airtableBase": user.airtableBase
+                        "airtableToken": user.data.airtableToken,
+                        "airtableBase": user.data.airtableBase
                     }
                 })).data
                 
@@ -586,8 +579,8 @@ module.exports = {
 
                 const tasks = (await axios.get(app_domain + '/airtable/tasks', {
                     data:{
-                        'airtableToken': user.airtableToken,  
-                        'airtableBase': user.airtableBase
+                        'airtableToken': user.data.airtableToken,  
+                        'airtableBase': user.data.airtableBase
                     }
                 })).data
                 
@@ -637,7 +630,7 @@ module.exports = {
                 } 
 
                 const invitation = (await axios.put(app_domain + "/github/repositories/"+req.params.repository+"/collaborators/"+req.params.username,{
-                    'githubToken': user.githubToken
+                    'githubToken': user.data.githubToken
                 })).data
 
                 if(invitation.status == "fail"){
@@ -683,7 +676,7 @@ module.exports = {
 
                 const invitation = (await axios.post(app_domain + "/github/users/githubInvitation",{
                     'email': req.body.email,
-                    'githubToken': user.githubToken
+                    'githubToken': user.data.githubToken
                 })).data
 
                 if(invitation.status == "fail"){
@@ -731,7 +724,7 @@ module.exports = {
 
                 const repositories = (await axios.get(app_domain + "/github/repositories", {
                     data:{
-                        'githubToken': user.githubToken
+                        'githubToken': user.data.githubToken
                     }
                 })).data
 
@@ -780,7 +773,7 @@ module.exports = {
                 
                 const assignIssue = (await axios.post(app_domain + "/github/repositories/" + req.body.repository + "/issues/" + req.params.issueID,{
                     "username": req.body.username, 
-                    "githubToken": user.githubToken
+                    "githubToken": user.data.githubToken
                 })).data
 
                 if(assignIssue.status == "fail"){
@@ -794,7 +787,7 @@ module.exports = {
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: githubIssue
+                    data: githubIssue.data
                 });
             } catch (error) {
                 console.log(error);
@@ -825,9 +818,9 @@ module.exports = {
                     })
                 } 
 
-                const issues = (await axios.get(app_domain + "/github/issues/" + repository,{
+                const issues = (await axios.get(app_domain + "/github/issues/" + req.params.repository,{
                     data:{
-                        'githubToken': githubToken
+                        'githubToken': user.data.githubToken
                     }
                 })).data
 
@@ -846,6 +839,13 @@ module.exports = {
                 });
             } catch (error) {
                 console.log(error);
+                if(error.response.data.statusCode == 404) {
+                    return res.status(404).send({
+                        status: 'fail',
+                        statusCode: error.response.data.statusCode,
+                        errorMessage: error.response.data.errorMessage
+                    })
+                }
                 return res.status(500).send({
                     status: 'fail',
                     statusCode: 500,
