@@ -4,7 +4,7 @@ const { MESSAGES } = require('../common');
 
 module.exports = telegrambot => {
   telegrambot.hears('🔍 Get Tasks', async (ctx) => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   
     try {
       const response = (await axios.get(app_domain + '/process/users/'+ctx.from.id)).data;

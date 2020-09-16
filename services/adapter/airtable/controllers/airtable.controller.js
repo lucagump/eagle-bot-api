@@ -337,6 +337,7 @@ module.exports = {
                 }
 
                 var task = await base('Tasks').find(req.params.taskID)
+                console.log(task)
                 if(!((task.fields.AssignTo).includes(member.id))){
                     task.fields.AssignTo.push(member.id)
                 }

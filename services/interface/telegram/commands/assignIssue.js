@@ -5,7 +5,7 @@ const { MESSAGES } = require('../common');
 module.exports = telegrambot => {
 
   telegrambot.hears('Assign Issue 😎', async function (ctx) {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
     return ctx.reply("To assign an issue just send the command as describe in the example below: \n\n /assignissue repository issueID githubUsername")
   });
 

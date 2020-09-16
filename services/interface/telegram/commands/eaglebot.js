@@ -19,7 +19,7 @@ module.exports = telegrambot => {
 
   // Task & Issues Menu
   telegrambot.hears('🚀 Tasks and Issues 🚀', async ctx => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
     try {
       await ctx.reply("Select an Action to start",Markup
         .keyboard([
@@ -40,7 +40,7 @@ module.exports = telegrambot => {
 
   // Alias in Menu to go back 
   telegrambot.hears('🏎🏁E-Agle Bot🏁🏎', async ctx => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
     ctx.reply("Select an Action to start", Markup
       .keyboard([
         ['🚀 Tasks and Issues 🚀'], 
@@ -55,7 +55,7 @@ module.exports = telegrambot => {
 
   // Assign Task & Issues Menu
   telegrambot.hears('⭐️ Assign 📢', async ctx => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
 
     try {
       await ctx.reply("Select an Action to start",Markup
@@ -77,7 +77,7 @@ module.exports = telegrambot => {
 
   // Settings Menu
   telegrambot.hears('🤖 Bot Settings 🤖', async ctx => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
 
     ctx.reply("Select an Action to start",Markup
       .keyboard([
@@ -93,7 +93,7 @@ module.exports = telegrambot => {
 
   // Menu Create Issue/Task or both
   telegrambot.hears('New Issue 😎', async ctx => {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
   
     ctx.reply('Here we are! You can create a new issue or a new task as showed below, '+
     'you can do both using /problem \n\n'+

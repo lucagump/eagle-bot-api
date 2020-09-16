@@ -20,7 +20,7 @@ async function assignTask(ctx,taskID,username){
 module.exports = telegrambot => {
 
   telegrambot.hears('⭐️ Assign Task', async function (ctx) {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
     return ctx.reply("To assign a task just send the command as describe in the example below: \n\n /assigntask taskID githubUsername")
   });
   
@@ -45,8 +45,7 @@ module.exports = telegrambot => {
           return ctx.reply("Task: " + taskID + " cannot be assigned",Extra.HTML())          
         }
 
-        return ctx.reply(response.data) 
-
+        return ctx.reply("Task: " + response.data.Task + " - is in "+ response.data.Status + "\n\n" + " ID: " + response.data.id,Extra.HTML())          
 
       } catch (error) {
         console.log(error);

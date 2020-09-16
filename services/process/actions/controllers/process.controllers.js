@@ -172,7 +172,7 @@ module.exports = {
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: response.data
+                    data: task.data
                 })
             } catch (error) {
                 console.log(error);

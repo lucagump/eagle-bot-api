@@ -10,6 +10,24 @@ const business_controller = require('./controllers/business.controllers');
 //  |______  /____//____  >__|___|  /\___  >____  >____  >
 //         \/           \/        \/     \/     \/     \/ 
 
+/*
+    GET		/repositories/:userID
+            /topics/repositories
+            /issues/:repository
+            /tasks/groups/:groups/:userID
+            /tasks/:userID
+            /groups/members/:username
+            /groups/members
+    POST 	/issues/:issueID
+            /issues
+            /users/githubInvitation
+            /tasks/:groups
+            /tasks
+            /problems
+    PUT 	/tasks/:taskID
+            /repositories/:repository/collaborators/:username
+*/
+
 router.get('/groups/members', business_controller.getMembers)
 router.get('/groups/members/:username', business_controller.getMember)
 

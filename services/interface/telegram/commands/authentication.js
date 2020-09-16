@@ -4,7 +4,7 @@ const { MESSAGES } = require('../common');
 
 module.exports = telegrambot => {
   telegrambot.hears('🤖Authentication', async function (ctx) {
-    await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
+    // await ctx.deleteMessage(ctx.from.chat_id, ctx.update.message.message_id)
     ctx.reply("Send the command in this format:"+
       "/authentication airtableToken airtableBase githubToken usernameGitHub group1 group2"
     );

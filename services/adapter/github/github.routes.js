@@ -14,7 +14,7 @@ const github_controller = require('./controllers/github.controllers');
 	GET		/repositories
 			/repositories/topics
 			/repositories/:repository/topics
-			/user/USD
+			/issues/:repository
 	POST 	/repositories/:repository/issues/:issueID
 			/issues/:repository
 			/users/githubInvitation

@@ -2,7 +2,7 @@ const Telegraf = require('telegraf');
 const requireAll = require('require-all');
 
 const BOT_COMMANDS = requireAll({ dirname: `${__dirname}/commands` });
-console.log(BOT_COMMANDS)
+// console.log(BOT_COMMANDS)
 // https://api.telegram.org/bot1225404853:AAHj66gyJMvEygjmXIyAdewtcRR0g37UHxo/setWebhook
 
 // 

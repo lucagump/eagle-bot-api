@@ -20,10 +20,11 @@ module.exports = {
                         errorMessage: task.errorMessage
                     })
                 }                
+                var membersData = members.data
+                var minTask = membersData[0];      
 
-                var minTask = members[0];      
-                members.forEach(element => {
-                    if (minTask.tasks.length > (element.tasks).length) {
+                membersData.forEach(element => {
+                    if (minTask.tasks.length > element.tasks.length) {
                         minTask = element;
                     }
                 });
@@ -295,7 +296,7 @@ module.exports = {
             try {
                 var topics = req.body.topics
                 var repositoriesWithTopics = {}
-
+                
                 const response = (await axios.get(app_domain + "/github/repositories", {
                     data:{
                         'githubToken': req.body.githubToken
@@ -310,10 +311,10 @@ module.exports = {
                     })
                 } 
                 var repositories = response.data
+            
+                for (let index = 0; index < repositories.length; index++) {
+                    const element = repositories[index];
 
-                console.log(repositories)
-                
-                repositories.forEach(async function(element) {
                     var repositoryContains = (await axios.get(app_domain + "/github/repositories/"+element+"/topics", {
                         data:{
                             'githubToken': req.body.githubToken
@@ -328,21 +329,18 @@ module.exports = {
                         })
                     } 
                     var repositoryContainsTag = repositoryContains.data
-                    var repositoriesWithTopics = {}
-
+            
                     var result = []
-                    for (let index = 0; index < topics.length; index++) {
-                        if(repositoryContainsTag.includes(topics[index])){
-                            result.push(topics[index])
+                    for (let indey = 0; indey < topics.length; indey++) {
+                        if(repositoryContainsTag.includes(topics[indey])){
+                            result.push(topics[indey])
                         }
                     }
                     if(result.length > 0){
                         repositoriesWithTopics[element] = result;
                     }
-                    console.log(repositoriesWithTopics)
-                });
+                };
                 
-                // console.log(repositoriesWithTopics)
                 var responseInverted = {};
                 for (const key in repositoriesWithTopics) {
                     for (const element of repositoriesWithTopics[key]) {
@@ -759,7 +757,6 @@ module.exports = {
     },
     assignIssue: async function(req, res) {
         if(req.body.userID != null && req.body.username != null && req.body.repository != null && req.params.issueID != null){
-            console.log(req.body)
             try {
                 const user = (await axios.get(app_domain + "/database/users/" + req.body.userID)).data
 
@@ -787,7 +784,7 @@ module.exports = {
                 return res.status(200).send({
                     status: 'success',
                     statusCode: 200,
-                    data: githubIssue.data
+                    data: assignIssue.data
                 });
             } catch (error) {
                 console.log(error);

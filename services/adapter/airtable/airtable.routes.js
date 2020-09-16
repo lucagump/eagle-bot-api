@@ -12,7 +12,7 @@ const airtable_controller = require('./controllers/airtable.controller');
 
 /*
 	GET		/form
-			/members/BTC
+			/members
 			/members/:username
 			/groups/:groups
 			/tasks
